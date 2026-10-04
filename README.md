@@ -1,1 +1,1 @@
-Turn ChatGPT into a stateful web IDE! Deploy *once* via one-click install to your own Cloudflare, then use your favorite zero-click workflow to go from "Make a website about ..." to **www.a-website-about.com**. Uses Cloudflare KV as a decentralized Git alternative.
+Turn ChatGPT into a stateful web IDE! Deploy *once* via one-click install to your own Cloudflare, then use your favorite zero-click workflow to go from **"Create a website about ..."** directly to **here is www.a-website-about.com**. Uses Cloudflare KV as a decentralized Git alternative.
