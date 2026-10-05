@@ -179,3 +179,9 @@ The installer now selects `/releases/0.1.1/`, signed from source `1d426a284e4a7b
 ### Workers release-download patch: 0.1.2
 
 Current installer release: `/releases/0.1.2/`, signed from clean source `9ae1cd260427734b09b7dbf3183da8e4ed19841d`. Workers rejects `redirect: "error"`; release downloads now use manual redirects and reject non-success responses. Hosted installer releases use the ASSETS binding with signature/checksum verification. All 33 tests and the browser form regression passed before signing. Previous archives are unchanged; GitHub build provenance remains pending.
+
+### Owner setup and progress update: 0.1.3
+
+Current installer release: `/releases/0.1.3/`, signed from clean source `8cee1822069e2e76a2ee512955e765110b6e0479`. Includes distinct owner UI, explicit ownership and publishing-token instructions, the MCP URL in Settings → Cloudflare → Installation receipt, and in-place progress updates instead of meta-refresh. Verified by 33 tests, two browser regressions, and 12 owner viewport/theme checks. Existing independent Publisher installations are not automatically changed.
+
+To update an existing 0.1.2 Publisher after its owner has connected a publishing token: in that Worker's Cloudflare Settings → Variables and Secrets, set `RELEASE_BASE_URL` to `https://chatgpt-to-public.jumpermcp.dev/releases/0.1.3/` and deploy that configuration. Then use Check for updates in the Publisher owner UI, review 0.1.3, and select Update Publisher. Preserve all other bindings and secrets. No reinstall is needed. Actual owner-approved updates remain a live acceptance experiment.
