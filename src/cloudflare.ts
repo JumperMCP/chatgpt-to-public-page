@@ -48,7 +48,8 @@ export class Cloudflare implements DeploymentProvider {
     body?: unknown,
     token?: string,
   ): Promise<T> {
-    const response = await this.fetcher(
+    const fetcher = this.fetcher;
+    const response = await fetcher(
       `https://api.cloudflare.com/client/v4/accounts/${encodeURIComponent(this.account)}${path}`,
       {
         method,
@@ -337,8 +338,9 @@ export class Cloudflare implements DeploymentProvider {
   }
   async reachable(url: string, spa: boolean) {
     try {
+      const fetcher = this.fetcher;
       for (const path of spa ? ["/", "/__publisher_spa_probe__"] : ["/"]) {
-        const r = await this.fetcher(url + path, {
+        const r = await fetcher(url + path, {
           method: "GET",
           redirect: "manual",
           signal: AbortSignal.timeout(8000),
