@@ -36,6 +36,17 @@ test("owner update pauses pending publication between steps and resumes it after
         await this.alarm();
         return {update:this.updates.current(),ran:!!this.store.get('publication-ran'),ops:this.publications.pending()};
       }
+      async pollWithScheduledRetry(operation, delay = 4000) {
+        // A retry is already due sooner than the current backoff interval.
+        const due = Date.now() + delay;
+        await this.ctx.storage.setAlarm(due);
+        const response = await this.fetch(new Request(this.env.PUBLISHER_ORIGIN+"/mcp", {
+          method:"POST",headers:{"Content-Type":"application/json",Accept:"application/json, text/event-stream","X-Publisher-Owner-Epoch":this.auth.epoch()},
+          body:JSON.stringify({jsonrpc:"2.0",id:1,method:"tools/call",params:{name:"get_operation",arguments:{operation}}})
+        }));
+        const body = await response.text();
+        return {due,after:await this.ctx.storage.getAlarm(),status:response.status,body};
+      }
       async snapshot(revision, project) {
         const r=this.projects.revision(revision, project);
         return new TextDecoder().decode(this.projects.bytes(r.files['index.html']));
@@ -62,7 +73,7 @@ test("owner update pauses pending publication between steps and resumes it after
         prepare(): Promise<{
           token: string;
           csrf: string;
-          op: unknown;
+          op: { id: string };
           revision: { id: string; project: string };
         }>;
         apply(
@@ -72,9 +83,32 @@ test("owner update pauses pending publication between steps and resumes it after
         advanceUpdate(
           outcome: string,
         ): Promise<{ update: { state: string }; ran: boolean; ops: unknown[] }>;
+        pollWithScheduledRetry(
+          operation: string,
+          delay?: number,
+        ): Promise<{
+          due: number;
+          after: number;
+          status: number;
+          body: string;
+        }>;
         snapshot(revision: string, project: string): Promise<string>;
       };
       const initial = await stub.prepare();
+      const polled = await stub.pollWithScheduledRetry(initial.op.id);
+      assert.equal(polled.status, 200, polled.body);
+      assert.match(polled.body, /activating/);
+      assert.equal(
+        polled.after,
+        polled.due,
+        "A status poll must not postpone an existing publication retry",
+      );
+      const distant = await stub.pollWithScheduledRetry(initial.op.id, 60000);
+      assert.equal(distant.status, 200, distant.body);
+      assert.ok(
+        distant.after < distant.due,
+        "A distant alarm must move earlier when work is pending",
+      );
       const post = (csrf: string) => stub.apply(initial.token, csrf);
       assert.equal((await post("wrong")).status, 403);
       const response = await post(initial.csrf);

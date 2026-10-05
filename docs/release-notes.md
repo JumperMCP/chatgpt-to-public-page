@@ -1,5 +1,7 @@
-# 0.1.8 — allow updates while publication retries are pending
+# 0.1.9 — status polling must not postpone publication retries
 
-Remove the update admission guard that rejected every pending publication. A retrying activation could otherwise prevent installing the very update needed to repair or diagnose it. Publisher already serializes owner requests and alarms, prioritizes queued updates, and resumes stored publication operations after the update completes or fails.
+MCP calls previously reset the next alarm to a full retry interval from the current time. Repeated status checks could postpone publication indefinitely. Scheduling now preserves an earlier alarm while still moving distant alarms forward when work is queued.
 
-The runtime regression reproduces the old busy error and checks authenticated update admission, CSRF rejection, update priority, preservation of pending operation state and uploaded bytes, and resumption after both successful and failed updates. No migration or credential changes. Includes the publication reconciliation and safe Cloudflare diagnostics from 0.1.7.
+The workerd regression calls the actual authenticated MCP get_operation route and verifies the retry deadline is preserved. It also checks moving a distant alarm earlier and retains the update/publishing pause-resume coverage. No migration or credential changes.
+
+The independent tester confirmed the 0.1.8 update succeeded but the site remained private. This scheduling correction does not establish the cause of Cloudflare's activation rejection; obtain the current Recent operations endpoint/status/code diagnostics before changing account settings or permissions.

@@ -118,14 +118,17 @@ export class Publisher extends DurableObject<Env> {
     });
   }
   private async schedule() {
-    await this.ctx.storage.setAlarm(
+    const next =
       Date.now() +
-        (this.updates.pending()
-          ? 30000
-          : this.publications.pending().length
-            ? this.publications.nextDelay()
-            : 3600000),
-    );
+      (this.updates.pending()
+        ? 30000
+        : this.publications.pending().length
+          ? this.publications.nextDelay()
+          : 3600000);
+    // Tool calls (including status polls) must not postpone work already due.
+    const existing = await this.ctx.storage.getAlarm();
+    if (existing === null || next < existing)
+      await this.ctx.storage.setAlarm(next);
   }
   private async formData(request: Request) {
     const bytes = await readBounded(request.body, 16384);
