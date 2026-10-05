@@ -1,6 +1,6 @@
 # Acceptance ledger
 
-The plan remains [PRD/technical-plan.md](../PRD/technical-plan.md). This ledger distinguishes implemented local behavior from external evidence. No live-account or novice-usability result is claimed.
+The plan remains [PRD/technical-plan.md](../PRD/technical-plan.md). This ledger distinguishes implemented local behavior from external evidence. Live installer hosting and OAuth-start smoke checks are recorded below. End-to-end independent-account installation and novice usability remain unverified.
 
 | Area | Local implementation/evidence | Still required |
 | --- | --- | --- |
@@ -12,7 +12,7 @@ The plan remains [PRD/technical-plan.md](../PRD/technical-plan.md). This ledger 
 | Installer | Browser PKCE, account selection, durable progress/retry, grant expiry/erasure, signed release, token fallback | Live grant/provisioning with configured scopes, independent account, permission denial and partial-install recovery (operator supplied successful OAuth client scope update and domain/public-visibility evidence on 2026-10-05) |
 | Cloudflare refresh | Encrypted credentials, serialized refresh, durable replacement, interrupted-rotation reconnect tests | Handoff on public client, expiry/rotation/idle/revocation observations; no lifetime assumptions |
 | Updates | Signed manifest/checksums, compatibility checks, owner review, durable self-update/reconciliation, secret/binding preservation metadata | Actual self-upload preserving encryption key, DO data/class/tag, failed-update and known-good recovery |
-| Distribution | MIT, pinned dependencies/lockfile, clean-commit release script, CI | Signed numbered release, independently distributed key, issued build provenance |
+| Distribution | MIT, pinned dependencies/lockfile, CI; signed 0.1.0 hosted on installer domain, HTTPS downloads and signature verified | Independently distributed key, issued build provenance |
 | Documentation/media | Current scope, setup/recovery/uninstall, source-linked architecture, comparisons | Real screenshots, README GIF, captioned video, recorded novice test |
 
 ## Experiment 1: Cloudflare ownership
@@ -47,3 +47,13 @@ Produce:
 - A dashboard recovery/uninstall recording showing unrelated resources remain intact.
 
 Redact tokens, passwords, authorization codes, setup links, private account details, and signed file URLs before distribution. Record dates, release checksum, account plan, and measured limits next to the evidence.
+
+## Installer hosting smoke check — 2026-10-05
+
+Deployed installer source `80e5792e3420d1394ae5f15cf7d629a15e38c142`, Cloudflare
+version `095ad058-24a9-4490-858a-5d3611e6b341`. Public release manifest, bundle,
+and checksums returned 200 without redirects, matched archived bytes, and passed
+signature/checksum verification. Root session cookie/no-store behavior and the
+CSRF-protected S256 OAuth-start redirect passed. All 25 local tests and GitHub CI
+passed. Consent, token exchange, user-account provisioning, grant refresh, and
+ChatGPT connection are not covered by this smoke check.

@@ -62,7 +62,7 @@ Create an Ed25519 signing key outside the repository, store the private key secu
 
 Configured on 2026-10-05 from the operator-provided SSH public key `id_ed25519_chatgpt-to-public.pub`. Its 32-byte Ed25519 public key was extracted and successfully imported with Web Crypto; `RELEASE_PUBLIC_KEY` now contains that raw key in base64. SSH fingerprint: `SHA256:Y4l70X4r8JwpPchts+vjZezbaXBA3kwtdKIKsuCn3x0`. The operator converted the private key to PKCS#8 PEM outside the repository. On 2026-10-05, a local check confirmed that the converted key matches the configured public key, a sign/verify round trip passed, and file permissions are 0600. No release has been signed yet. Independent fingerprint publication remains pending.
 
-From a clean committed source tree, install locked dependencies, run checks/tests, build, and run `npm run release`. Archive `release.json`, `worker.js`, and `SHA256SUMS` under `public/releases/<version>/`. The installer serves this directory as static assets at `https://chatgpt-to-public.jumpermcp.dev/releases/<version>/`, without redirects or installation cookies. Existing version directories are immutable: add a new version instead of replacing files. The manifest contains a source commit, schema/tag/class compatibility, checksums, and release notes. Archive the previous working bundle. The manual release workflow signs and attests both Worker bundles. Configure the protected `release` environment and its `RELEASE_SIGNING_KEY` secret before running it. No workflow has run and no provenance has yet been issued.
+From a clean committed source tree, install locked dependencies, run checks/tests, build, and run `npm run release`. Archive `release.json`, `worker.js`, and `SHA256SUMS` under `public/releases/<version>/`. The installer serves this directory as static assets at `https://chatgpt-to-public.jumpermcp.dev/releases/<version>/`, without redirects or installation cookies. Existing version directories are immutable: add a new version instead of replacing files. The manifest contains a source commit, schema/tag/class compatibility, checksums, and release notes. Archive the previous working bundle. The manual release workflow signs and attests both Worker bundles. Configure the protected `release` environment and its `RELEASE_SIGNING_KEY` secret before running it. The validation workflow has passed; the manual signing/attestation workflow has not run and no build provenance has yet been issued.
 
 Set these installer values:
 
@@ -149,3 +149,25 @@ fetch their pinned release. Verify each file with redirects disabled and verify
 the downloaded manifest signature and module digest against the configured key.
 The root installer page must still create a private session; static release
 downloads must not create installation sessions.
+
+### First live deployment — 2026-10-05
+
+Installer source: `80e5792e3420d1394ae5f15cf7d629a15e38c142`. Cloudflare version:
+`095ad058-24a9-4490-858a-5d3611e6b341`. The custom domain is active and
+`INSTALLER_KEY` was supplied as a secret at first deployment; the temporary
+secret file was deleted afterward.
+
+Verified over public HTTPS: all three `0.1.0` release files return 200 without
+redirects or session cookies and exactly match the local archived bytes. The
+manifest signature and module checksum pass verification. The root page returns
+200 with a Secure/HttpOnly host-only installation cookie and `no-store`. A
+CSRF-authenticated start request returns the expected Cloudflare authorization
+redirect with the configured client ID, callback, permission scopes, and S256.
+No browser consent or user-account provisioning was performed by this check.
+All 25 local tests and the GitHub validation workflow passed.
+
+Next: open the installer in the independent tester's browser, click **Install on
+my Cloudflare**, authorize Publisher, and select the independent account. Record
+errors without sharing authorization codes, cookies, or setup tokens. The API
+token fallback remains enabled; ChatGPT callbacks and file-host allowlists remain
+empty pending the separate client experiment.
