@@ -70,40 +70,55 @@ export class Cloudflare implements DeploymentProvider {
         signal: AbortSignal.timeout(30000),
       },
     );
+    let data:
+      | { success: boolean; result: T; errors?: { code?: unknown }[] }
+      | undefined;
+    try {
+      data = await response.json();
+    } catch {
+      /* Report HTTP failures even when Cloudflare returns no JSON. */
+    }
+    const codes = Array.isArray(data?.errors)
+      ? data.errors
+          .map((e) => e?.code)
+          .filter(
+            (code): code is number =>
+              typeof code === "number" && Number.isSafeInteger(code),
+          )
+          .slice(0, 8)
+      : [];
+    const diagnostic = `${method} ${path.split("?")[0]} (HTTP ${response.status}${codes.length ? "; codes " + codes.join(", ") : ""}).`;
     if (response.status === 401 || response.status === 403) {
       this.credentials.revoked();
       throw new Problem(
         "cloudflare_permission",
-        "Cloudflare denied access. Check the account and scoped credential, then reconnect.",
+        "Cloudflare denied access. Check the publishing token's account and permissions. " +
+          diagnostic,
         503,
       );
     }
     if (response.status === 404)
       throw new Problem(
         "cloudflare_not_found",
-        "The Cloudflare resource was not found.",
+        "The Cloudflare resource was not found. " + diagnostic,
         404,
       );
     if (response.status === 429)
       throw new Problem(
         "cloudflare_quota",
-        "Cloudflare rate or account limits were reached. Wait or review your account limits.",
+        "Cloudflare rate or account limits were reached. " + diagnostic,
         503,
       );
-    let data: { success: boolean; result: T };
-    try {
-      data = await response.json();
-    } catch {
-      throw new Problem(
-        "cloudflare_response",
-        "Cloudflare returned an unreadable response. Retry the operation.",
-        503,
-      );
-    }
+    requireThat(
+      data && typeof data === "object",
+      "cloudflare_response",
+      "Cloudflare returned an unreadable response. " + diagnostic,
+      503,
+    );
     requireThat(
       response.ok && data.success,
       "cloudflare_error",
-      "Cloudflare could not complete the request. Check permissions, account verification, name availability and quotas.",
+      "Cloudflare rejected the request. " + diagnostic,
       503,
     );
     return data.result;
@@ -254,9 +269,9 @@ export class Cloudflare implements DeploymentProvider {
       full = current?.versions.find((v) => v.percentage === 100);
     if (!full) return null;
     const details = await this.api<{
-      metadata: { annotations?: Record<string, string> };
+      annotations?: Record<string, string>;
     }>(this.path(project) + "/versions/" + full.version_id);
-    const operation = details.metadata.annotations?.["workers/message"];
+    const operation = details.annotations?.["workers/message"];
     return {
       version: operation ? "assets:" + operation : full.version_id,
       remoteVersion: full.version_id,

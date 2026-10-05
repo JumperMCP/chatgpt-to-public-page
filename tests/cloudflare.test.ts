@@ -82,7 +82,7 @@ test("assets-only upload sends complete manifest and serving rules, without a sc
       };
     } else if (url.endsWith("/versions/version")) {
       result = {
-        metadata: { annotations: { "workers/message": "operation" } },
+        annotations: { "workers/message": "operation" },
       };
     } else if (url.endsWith("/scripts/static-site") && init?.method === "PUT") {
       assert.ok(init?.body instanceof FormData);
@@ -108,4 +108,39 @@ test("assets-only upload sends complete manifest and serving rules, without a sc
   assert.match(metadata.assets.config._headers, /noindex/);
   assert.equal(metadata.main_module, undefined);
   assert.equal(metadata.bindings, undefined);
+});
+
+test("Cloudflare failures expose endpoint, HTTP status and numeric codes without response secrets", async () => {
+  const store = new TestStore(),
+    projects = new Projects(store, "account");
+  const credentials = new Credentials(store, "11".repeat(32), async () => {
+    throw Error();
+  });
+  const provider = new Cloudflare(
+    "account",
+    "installation",
+    credentials,
+    projects,
+    async () =>
+      Response.json(
+        {
+          success: false,
+          errors: [{ code: 10021, message: "private-provider-detail" }],
+        },
+        { status: 400 },
+      ),
+  );
+  await assert.rejects(
+    provider.api("/workers/scripts/site", "PUT", undefined, "private-token"),
+    (error: Error) => {
+      assert.match(error.message, /PUT \/workers\/scripts\/site/);
+      assert.match(error.message, /HTTP 400/);
+      assert.match(error.message, /10021/);
+      assert.doesNotMatch(
+        error.message,
+        /private-provider-detail|private-token/,
+      );
+      return true;
+    },
+  );
 });

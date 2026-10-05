@@ -1,7 +1,7 @@
-# 0.1.6 — read actual Cloudflare update metadata
+# 0.1.7 — publication reconciliation and actionable Cloudflare errors
 
-The updater now reads the migration tag from the active Worker's version (`resources.script_runtime.migration_tag`), rather than from `/settings`, where Cloudflare does not return it. Completion reconciliation reads the version's top-level `annotations`. Both response shapes were verified against the live operator Worker and Cloudflare's API schema.
+Publication reconciliation now reads top-level Worker version annotations, matching Cloudflare's actual API shape. Previously the adapter could not identify an activated asset deployment as its own operation. The updater's corresponding correction was already included in 0.1.6.
 
-A missing tag, a different migration tag, or a deployment splitting traffic across versions still blocks upload. Successful reconciliation clears a stale upload error and avoids a duplicate upload after a lost response. Regression tests now use Cloudflare's actual response shape instead of invented settings fields.
+Cloudflare failures now include the request method/path, HTTP status, and numeric provider error codes. Provider message bodies, tokens, and query strings are not exposed. Tests cover activation with the actual annotation shape and redaction of provider details.
 
-Includes the 0.1.5 native-fetch repair and 0.1.4 consent diagnostics. Existing old updaters need the documented bootstrap correction; changing the release version label or migration tags does not fix them. No schema migration, password reset, or authentication-policy changes. Independent update completion and ChatGPT consent remain pending.
+The independent tester reported a failed first website activation. Operator-account probes for a new Worker's empty deployment list and an empty assets-only activation both succeeded; temporary Workers were removed. These probes do not establish the tester's actual rejection. Use the improved error details to diagnose the existing publication rather than creating another project. No migration or credential changes.

@@ -94,3 +94,7 @@ The chronological troubleshooting observations, actions, and pending checks are 
 ## Correct `/mcp` connection succeeded — 2026-10-05
 
 The tester confirmed that connection succeeded with the correct `/mcp` URL and is testing web Chat. “Try in chat” showed an ambiguous Work-upgrade prompt, followed by “Allow ChatGPT to use Publisher?”; the tester chose Always Allow. This establishes user-reported connection success and arrival at Chat tool permissions. A successful authenticated tool result, publication, fresh-chat edit, and refresh behavior remain unverified. The Work popup is logged in QUIRKS.md without treating it as proof of a paid-plan requirement.
+
+## First chat publication attempt — 2026-10-05
+
+After connecting the corrected `/mcp` URL, the tester used web Chat to create a site. ChatGPT reported an activation failure and the expected URL served Cloudflare's placeholder. This is user-reported tool-driven staging/publication activity, not a confirmed live site. Operator API probes for empty deployments and empty assets-only activation succeeded and were cleaned up. Version 0.1.7 fixes the remaining publication annotation lookup and exposes safe Cloudflare status/codes; the tester's rejection still needs those details. Preserve and inspect the existing project/operation rather than recreate it.
