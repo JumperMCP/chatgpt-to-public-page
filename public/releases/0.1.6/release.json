@@ -1,0 +1,20 @@
+{
+  "manifest": {
+    "version": "0.1.6",
+    "commit": "53f94836abbeac3877587edc2b0c06b124de3c6d",
+    "schema": 1,
+    "migration_tag": "v1",
+    "durable_object_class": "Publisher",
+    "compatibility_date": "2026-09-01",
+    "modules": [
+      {
+        "name": "worker.js",
+        "sha256": "24904d97bc725130264854ceaaeed1fc76ddd5bf162428ae5522fa5b84c9d970",
+        "size": 1806264,
+        "type": "application/javascript+module"
+      }
+    ],
+    "notes": "# 0.1.6 — read actual Cloudflare update metadata\n\nThe updater now reads the migration tag from the active Worker's version (`resources.script_runtime.migration_tag`), rather than from `/settings`, where Cloudflare does not return it. Completion reconciliation reads the version's top-level `annotations`. Both response shapes were verified against the live operator Worker and Cloudflare's API schema.\n\nA missing tag, a different migration tag, or a deployment splitting traffic across versions still blocks upload. Successful reconciliation clears a stale upload error and avoids a duplicate upload after a lost response. Regression tests now use Cloudflare's actual response shape instead of invented settings fields.\n\nIncludes the 0.1.5 native-fetch repair and 0.1.4 consent diagnostics. Existing old updaters need the documented bootstrap correction; changing the release version label or migration tags does not fix them. No schema migration, password reset, or authentication-policy changes. Independent update completion and ChatGPT consent remain pending.\n"
+  },
+  "signature": "/O3kcMG9cW4zIWv7riWoAXrCTZhw6Oc7nD1jQ3/Ne+hZyhIH+CcBjkTXh8pk9djew08+1tp0lb7AUzcmR/LZBA=="
+}

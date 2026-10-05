@@ -217,3 +217,33 @@ Deploy that one-line repair. It preserves all bindings, secrets, owner passwords
 In Settings → Variables and Secrets, set `RELEASE_BASE_URL` to `https://chatgpt-to-public.jumpermcp.dev/releases/0.1.5/` and save/deploy. In Publisher, select Check for updates, review **0.1.5**, and Update Publisher. Confirm both **Update state: complete** and **Publisher 0.1.5** before retrying ChatGPT connection. Do not manually change `RELEASE_VERSION` to make an unsuccessful update look complete. If it fails, copy the visible error; do not keep retrying or reset the password.
 
 Release 0.1.5 is signed from clean source `19cd582c4d56d6dea7819e164dfb165ef52fc534`. All 34 automated tests and two browser tests pass. Includes the 0.1.4 consent-error recovery improvements. The tester's actual OAuth consent failure remains unconfirmed until the corrected version runs. Previous archives remain intact; signing is local and GitHub provenance remains pending.
+
+### Correct the old migration lookup, then install 0.1.6
+
+After the native-fetch repair, the tester reached “Migration tags differ”. The old updater reads a nonexistent `/settings` migration tag. Do not change tags or set `RELEASE_VERSION` manually. Cloudflare's active-version response supplies `resources.script_runtime.migration_tag`; completion annotations are top-level on that same version response.
+
+In the latest editable `worker.js`, find these two consecutive lines in the updater:
+
+```js
+const settings = await this.api.api(path + "/settings");
+const metadata = updateMetadata(op.release.manifest, settings, op.id);
+```
+
+Replace both lines with:
+
+```js
+const settings = await this.api.api(path + "/settings");
+const currentDeployment = await this.api.api(path + "/deployments");
+const activeVersions = currentDeployment.deployments[0]?.versions ?? [];
+requireThat(activeVersions.length === 1 && activeVersions[0].percentage === 100,
+  "ambiguous_deployment", "Expected one active Publisher version.");
+const activeVersion = await this.api.api(path + "/versions/" + encodeURIComponent(activeVersions[0].version_id));
+settings.migration_tag = activeVersion.resources?.script_runtime?.migration_tag;
+const metadata = updateMetadata(op.release.manifest, settings, op.id);
+```
+
+Keep the native-fetch wrapper and deploy. The original migration equality check still runs on the retrieved tag and rejects a mismatch. The exact bootstrap edit was exercised against the archived 0.1.2 bundle in workerd with the observed Cloudflare response structure and reached upload.
+
+Set `RELEASE_BASE_URL` to `https://chatgpt-to-public.jumpermcp.dev/releases/0.1.6/`, save/deploy, then Check for updates → review **0.1.6** → Update Publisher. The new version also fixes completion reconciliation. Confirm **Publisher 0.1.6** and **Update state: complete** before retrying ChatGPT. If compatibility still fails, retain the error and stop; do not invent a tag.
+
+0.1.6 is signed from clean source `53f94836abbeac3877587edc2b0c06b124de3c6d`; 34 automated and two browser tests passed. Older archives are unchanged. Independent update/consent and GitHub build provenance remain pending.

@@ -129,3 +129,7 @@ The independent tester reached owner setup and obtained the installation receipt
 ## Workers native fetch must not receive an adapter as `this`
 
 2026-10-05: the independent Publisher self-update failed before upload with a generic error. `this.fetcher(url)` where `fetcher` was assigned global `fetch` throws Workers `TypeError: Illegal invocation`. Node tests with injected arrow-function mocks did not expose it. Copy the stored function to a local variable and call `fetcher(url)`; site reachability probes need the same fix. `tests/cloudflare-runtime.test.ts` exercises both paths through the bundled adapter in workerd. For old deployments, the one-line constructor wrapper and signed 0.1.5 update procedure are in `docs/operator-setup.md`.
+
+## Worker migration tags and version annotations
+
+2026-10-05 live API and schema check: script `/settings` does not return `migration_tag`. Read it from the active version's `resources.script_runtime.migration_tag`. Version `annotations` is top-level, not nested under `metadata`. The old updater and mocked fixtures invented both response fields, causing a false migration mismatch and broken completion reconciliation. Fixed in 0.1.6 with mismatch/missing-tag/split-deployment rejection retained.
