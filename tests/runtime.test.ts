@@ -169,6 +169,26 @@ test("real Worker + SQLite DO: setup, owner UI, sibling isolation, protected MCP
     assert.match(retryHtml, /name="return_to"/);
     assert.match(retryHtml, /type="password"/);
     assert.doesNotMatch(retryHtml, /wrong password/);
+    for (const resources of [
+      [origin],
+      [origin + "/mcp/"],
+      [origin + "/mcp", origin],
+    ]) {
+      const wrongTarget = new URLSearchParams(authQuery);
+      wrongTarget.delete("resource");
+      for (const resource of resources)
+        wrongTarget.append("resource", resource);
+      r = await call("/authorize?" + wrongTarget, {
+        headers: { Cookie: cookie, Accept: "text/html" },
+      });
+      assert.equal(r.status, 400);
+      const targetError = await r.text();
+      assert.match(targetError, /invalid_target/);
+      assert.match(
+        targetError,
+        /The resource parameter must name exactly one configured protected resource/,
+      );
+    }
     const invalidAuth = new URLSearchParams(authQuery);
     invalidAuth.set("client_id", "not-yet-visible");
     r = await call("/authorize?" + invalidAuth, {

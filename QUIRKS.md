@@ -124,7 +124,7 @@ Removed the visible UTC authorization deadline. Expiry remains enforced server-s
 
 The tester had to allow approximately five automatic redirects before reaching owner setup. Removed meta-refresh. A same-origin script now reads progress and replaces the main content in place, stops on completion/errors, and offers manual refresh after repeated network failures. A real Chromium regression verifies the complete transition with only the initial navigation; Firefox’s reported redirect mechanism is no longer used.
 
-The independent tester reached owner setup and obtained the installation receipt/MCP URL. Their ChatGPT subscription does not expose custom MCP creation. An eligible ChatGPT account can connect to that independent Cloudflare installation; the exact callback allowlist remains to be verified. See https://developers.openai.com/plugins/deploy/connect-chatgpt .
+The independent tester reached owner setup and obtained the installation receipt/MCP URL. Initially custom MCP creation was not visible; enabling developer mode later exposed it. The tester subsequently confirmed the exact stable callback and completed registration (see the dated connection log below). See https://developers.openai.com/plugins/deploy/connect-chatgpt .
 
 ## Workers native fetch must not receive an adapter as `this`
 
@@ -133,3 +133,21 @@ The independent tester reached owner setup and obtained the installation receipt
 ## Worker migration tags and version annotations
 
 2026-10-05 live API and schema check: script `/settings` does not return `migration_tag`. Read it from the active version's `resources.script_runtime.migration_tag`. Version `annotations` is top-level, not nested under `metadata`. The old updater and mocked fixtures invented both response fields, causing a false migration mismatch and broken completion reconciliation. Fixed in 0.1.6 with mismatch/missing-tag/split-deployment rejection retained.
+
+## Running connection and update log — 2026-10-05
+
+This log records observations separately from explanations. Append new outcomes as testing progresses. Never include passwords, tokens, full authorization URLs, or signed file URLs.
+
+| Step | Observed hiccup | Finding/action | Status |
+| --- | --- | --- | --- |
+| ChatGPT creation availability | The tester initially saw no custom MCP option. | Enabling developer mode exposed creation. This was not established as a subscription restriction. | Creation available. |
+| Dynamic registration | HTTP 400 `invalid_client_metadata`, with the experimentally verified callback message. | Installed `CHATGPT_CALLBACKS` was empty. Tester observed `https://chatgpt.com/connector_platform_oauth_redirect` in New Plugin and configured that exact URL. | Registration succeeded. |
+| Owner login → consent | Generic “The operation could not complete” at `/authorize`, with no useful retry. | 0.1.4 exposes public SDK authorization errors and adds a retry link; incorrect-password forms retain the connection destination. | Later revealed `invalid_target`; password failure was not the cause shown. |
+| Updating the old Worker | Queued → failed; generic error. | Native fetch receiver bug reproduced in workerd. 0.1.5 fixes it; old code needs the constructor wrapper before it can update itself. | Repair advanced the updater to the next check. |
+| Cloudflare version selection | Code was read-only with “only latest version is editable”; the tester switched to latest. Saving produced a new version ID and sometimes disabled Deploy. | A saved version is not necessarily the deployed version. Verify the patched version serves 100% of traffic in Deployments. A Worker version ID, storage migration tag (`v1`), and Publisher release label are different identifiers. | Tester confirmed a configuration deployment followed the patched script version. |
+| Migration compatibility check | “Migration tags differ” at the updater metadata check. | `/settings` has no migration tag. Read the active version's `resources.script_runtime.migration_tag`; completion annotations are top-level. Fixed in 0.1.6 without bypassing migration equality. | Tester confirmed **Update state: complete** after 0.1.6 repair/update. |
+| Original ChatGPT plugin URL | `invalid_target`: resource must name exactly one configured protected resource. | Tester copied `resource` equal to the bare Publisher origin. ChatGPT details also showed the bare origin, while discovery advertises the exact `/mcp` URL. Suggested correcting/recreating the plugin with `/mcp`. | Original entry's mismatch confirmed. |
+| Uninstall/Delete visibility | Uninstall hid editing access but left Publisher visible/clickable. Delete took longer and also left an entry visible in the plugin list. | These are tester observations, not an established ChatGPT lifecycle or cache contract. Do not infer which entry is active solely from the display name. | Cause and eventual cleanup unverified. |
+| Recreated plugin | Tester created another plugin with the same name for the corrected URL, but owner sign-in again ended in `invalid_target`. | Need the **new** entry's displayed Server URL and the **new** request's isolated `resource` value before choosing between a lingering old entry and resource-selection incompatibility. | Pending; no audience allowlist relaxation or new Worker release made for this observation. |
+
+The expected MCP Server URL is `https://publisher-c047d890.anita-nyc-tattoo.workers.dev/mcp` (no trailing slash). Its unauthenticated challenge points to `/.well-known/oauth-protected-resource/mcp`; live metadata advertises the same exact URL. The root metadata path returns 404. Local runtime checks reject the bare origin, `/mcp/`, and multiple distinct audiences while accepting `/mcp`. These checks establish the server's behavior, not the new plugin's actual request.
