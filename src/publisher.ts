@@ -1,4 +1,5 @@
-import { ownerSetup, cloudflareSettings } from "./owner-ui";
+import { AuthorizationError } from "@cloudflare/workers-oauth-provider";
+import { ownerLogin, ownerSetup, cloudflareSettings } from "./owner-ui";
 import { Updates } from "./updates";
 import { refreshCloudflare } from "./cloudflare-oauth";
 import { DurableObject } from "cloudflare:workers";
@@ -72,12 +73,25 @@ export class Publisher extends DurableObject<Env> {
       try {
         return await this.route(request);
       } catch (error) {
-        const status = error instanceof Problem ? error.status : 500;
-        const safe = publicError(error);
+        const status =
+          error instanceof Problem
+            ? error.status
+            : error instanceof AuthorizationError
+              ? 400
+              : 500;
+        const safe =
+          error instanceof AuthorizationError
+            ? { code: error.code, message: error.description }
+            : publicError(error);
+        const url = new URL(request.url);
+        const consentRetry =
+          url.pathname === "/authorize" && request.method === "GET"
+            ? `<p><a href="${e(url.pathname + url.search)}">Retry connecting to ChatGPT</a></p><p>If this continues, return to ChatGPT and start Connect again. Your Publisher password does not need to be reset.</p>`
+            : "";
         return request.headers.get("accept")?.includes("text/html")
           ? page(
               "Action could not complete",
-              `<p>${e(safe.message)}</p><p><a href="/">Return to Publisher</a></p>`,
+              `<p>${e(safe.message)}</p>${error instanceof AuthorizationError ? `<p>Connection error: <code>${e(safe.code)}</code>.</p>` : ""}${consentRetry}<p><a href="/">Return to Publisher</a></p>`,
               status,
             )
           : Response.json(safe, {
@@ -246,15 +260,26 @@ export class Publisher extends DurableObject<Env> {
       return this.redirect("/", sessionCookie(session.token));
     }
     if (path === "/login" && request.method === "GET")
-      return page(
-        "Sign in",
-        `<form method="post"><label>Owner password<input type="password" name="password" autocomplete="current-password" required></label><button>Sign in</button></form><p>Forgotten your password? Use the Cloudflare-dashboard recovery procedure in the README.</p>`,
-      );
+      return page("Sign in", ownerLogin());
     if (path === "/login" && request.method === "POST") {
       exactOrigin(request, this.env.PUBLISHER_ORIGIN);
       const body = await this.formData(request);
-      const session = await this.auth.login(body.get("password") ?? "");
       const returnTo = body.get("return_to") ?? "/";
+      let session;
+      try {
+        session = await this.auth.login(body.get("password") ?? "");
+      } catch (error) {
+        if (
+          error instanceof Problem &&
+          ["invalid_login", "throttled"].includes(error.code)
+        )
+          return page(
+            "Sign in",
+            ownerLogin(returnTo, error.message),
+            error.status,
+          );
+        throw error;
+      }
       return this.redirect(
         returnTo.startsWith("/authorize?") ? returnTo : "/",
         sessionCookie(session.token),
@@ -267,7 +292,7 @@ export class Publisher extends DurableObject<Env> {
       if (request.method === "GET" && path === "/authorize")
         return page(
           "Sign in to connect ChatGPT",
-          `<form method="post" action="/login">${hidden("return_to", url.pathname + url.search)}<label>Owner password<input type="password" name="password" autocomplete="current-password" required></label><button>Continue to consent</button></form>`,
+          ownerLogin(url.pathname + url.search),
         );
       if (request.method === "GET" && path === "/")
         return this.redirect("/login");

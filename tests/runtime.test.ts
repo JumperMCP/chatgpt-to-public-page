@@ -127,6 +127,58 @@ test("real Worker + SQLite DO: setup, owner UI, sibling isolation, protected MCP
       code_challenge: challenge,
       code_challenge_method: "S256",
     });
+    // Exercise the real sign-in handoff, not only a preauthenticated consent page.
+    r = await call("/authorize?" + authQuery);
+    assert.equal(r.status, 200);
+    assert.match(await r.text(), /name="return_to"/);
+    r = await call("/login", {
+      method: "POST",
+      headers: {
+        Origin: origin,
+        Accept: "text/html",
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({
+        password: "a secure owner password",
+        return_to: "/authorize?" + authQuery,
+      }),
+    });
+    assert.equal(r.status, 303);
+    assert.equal(r.headers.get("location"), "/authorize?" + authQuery);
+    const loginCookie = r.headers.get("set-cookie")!.split(";")[0];
+    r = await call("/authorize?" + authQuery, {
+      headers: { Cookie: loginCookie },
+    });
+    assert.equal(r.status, 200);
+    assert.match(await r.text(), /Allow project access/);
+    r = await call("/login", {
+      method: "POST",
+      headers: {
+        Origin: origin,
+        Accept: "text/html",
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({
+        password: "wrong password",
+        return_to: "/authorize?" + authQuery,
+      }),
+    });
+    assert.equal(r.status, 401);
+    const retryHtml = await r.text();
+    assert.match(retryHtml, /Incorrect password/);
+    assert.match(retryHtml, /name="return_to"/);
+    assert.match(retryHtml, /type="password"/);
+    assert.doesNotMatch(retryHtml, /wrong password/);
+    const invalidAuth = new URLSearchParams(authQuery);
+    invalidAuth.set("client_id", "not-yet-visible");
+    r = await call("/authorize?" + invalidAuth, {
+      headers: { Cookie: cookie, Accept: "text/html" },
+    });
+    assert.equal(r.status, 400);
+    const connectionError = await r.text();
+    assert.match(connectionError, /Invalid client_id/);
+    assert.match(connectionError, /Retry connecting to ChatGPT/);
+    assert.doesNotMatch(connectionError, /The operation could not complete/);
     r = await call("/authorize?" + authQuery, { headers: { Cookie: cookie } });
     assert.equal(r.status, 200);
     const consentHtml = await r.text();

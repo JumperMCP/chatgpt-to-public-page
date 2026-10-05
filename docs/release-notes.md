@@ -1,7 +1,7 @@
-# 0.1.3 — clearer ownership and connection setup
+# 0.1.4 — recoverable ChatGPT connection errors
 
-Adds a distinct private-control-panel design for owner setup and settings. The hosting address, password ownership, reason for a publishing token, token-creation steps, and MCP URL location are explicit. The MCP URL is shown under Settings → Cloudflare → Installation receipt, alongside clearer ChatGPT plugin instructions.
+OAuth authorization validation errors now show the provider's public error description and code, with a link to retry the consent request. Previously these expected failures appeared as a generic internal error. Incorrect owner passwords and login throttling keep the sign-in form and ChatGPT connection destination, without retaining the password.
 
-Installer completion makes the handoff to the user’s Cloudflare-hosted Publisher clear. Progress updates in place instead of using meta-refresh, which Firefox blocked for the tester.
+The exact stable ChatGPT callback has been observed by the independent tester and configured for new installations. The tester confirmed dynamic client registration succeeds after configuring it; live consent and token exchange remain unverified. This release improves diagnosis and recovery; it does not claim to resolve the still-unidentified live authorization failure.
 
-No storage migration or authentication changes. Existing projects, credentials, and owner passwords remain intact. Independent-account installation and receipt retrieval have been confirmed; ChatGPT testing awaits an account with custom MCP access.
+No storage migration, password reset, or relaxation of callback, PKCE, scope, or owner authentication checks. Existing passwords and projects remain intact.
