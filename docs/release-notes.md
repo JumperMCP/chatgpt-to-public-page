@@ -1,7 +1,7 @@
-# 0.1.1 — browser form compatibility
+# 0.1.2 — Workers-compatible release downloads
 
-Fixes native browser form submissions by using a same-origin referrer policy. Owner setup, sign-in, and consent retain strict Origin checks without the browser replacing Origin with null. Consent pages permit navigation to the validated callback origin. HTML responses prohibit proxy transformation while retaining no-store and script-blocking CSP.
+Fixes release downloads in Cloudflare Workers by using manual redirect handling and rejecting non-success responses. Workers does not implement redirect mode `error`; previously its exception was mislabeled as invalid release metadata. Download and JSON parse failures now have separate actionable messages. Signatures and checksums remain mandatory.
 
-The installer also permits the Cloudflare OAuth navigation and uses the requested edge-to-edge hero artwork. A Chromium regression test exercises native form submission, external OAuth redirects, and rejection of null or foreign origins.
+The installer uses its direct static-assets binding for hosted releases, supports restarting expired sessions, and keeps progress responsive with automatic refresh. Technical expiry timestamps are no longer shown to users.
 
-Schema 1, migration tag v1, and Publisher Durable Object class are unchanged. The previous 0.1.0 archive remains available. Independent-account installation and ChatGPT compatibility experiments are still in progress; callback allowlists remain empty until verified.
+Schema 1, migration tag v1, and the Publisher class are unchanged. Previous releases remain archived. Independent-account installation and ChatGPT compatibility testing are still in progress.

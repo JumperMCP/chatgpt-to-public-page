@@ -18,25 +18,38 @@ export async function downloadRelease(
   );
   if (!url.pathname.endsWith("/")) url.pathname += "/";
   async function get(path: string, limit: number) {
-    const response = await fetcher(new URL(path, url), {
-      redirect: "error",
-      signal: AbortSignal.timeout(30000),
-    });
-    requireThat(
-      response.ok,
-      "release_download",
-      "The release could not be downloaded.",
-      503,
-    );
-    return readBounded(response.body, limit);
+    try {
+      const response = await fetcher(new URL(path, url), {
+        redirect: "manual",
+        signal: AbortSignal.timeout(30000),
+      });
+      requireThat(
+        response.ok,
+        "release_download",
+        "The installation files could not be loaded. Please try again shortly.",
+        503,
+      );
+      return await readBounded(response.body, limit);
+    } catch (error) {
+      if (error instanceof Problem) throw error;
+      throw new Problem(
+        "release_download",
+        "The installation files could not be loaded. Please try again shortly.",
+        503,
+      );
+    }
   }
+  const metadata = await get("release.json", 65536);
   let signed: SignedRelease;
   try {
-    signed = JSON.parse(decoder.decode(await get("release.json", 65536)));
-  } catch (error) {
-    if (error instanceof Problem) throw error;
-    throw new Problem("invalid_release", "Release metadata is invalid.");
+    signed = JSON.parse(decoder.decode(metadata));
+  } catch {
+    throw new Problem(
+      "invalid_release",
+      "The installation files could not be verified. Please report this problem to Jumper MCP.",
+    );
   }
+
   requireThat(
     Array.isArray(signed.manifest?.modules) &&
       signed.manifest.modules.length <= 20,

@@ -21,6 +21,7 @@ import {
 import { installationPage, installationError } from "./ui";
 interface InstallerEnv {
   INSTALLATIONS: DurableObjectNamespace;
+  ASSETS: Fetcher;
   INSTALLER_ORIGIN: string;
   CLIENT_ID: string;
   REQUIRED_SCOPES: string;
@@ -120,7 +121,7 @@ export class Installation extends DurableObject<InstallerEnv> {
   private render(state: Install) {
     if (state.expires <= Date.now() || state.step === "expired")
       return installationError(
-        `This installation session expired at ${new Date(state.expires).toUTCString()}. Start a new installation to authorize Cloudflare again.`,
+        "Your installation session timed out. Start a new installation to reconnect Cloudflare.",
         410,
         state.csrf,
       );
@@ -144,6 +145,16 @@ export class Installation extends DurableObject<InstallerEnv> {
       await this.ctx.storage.setAlarm(state.expires);
     }
     return state;
+  }
+  private release() {
+    const base = new URL(this.env.RELEASE_BASE_URL);
+    // Hosted releases are deployment assets: read them directly rather than
+    // making a public subrequest back into this same Worker/domain.
+    const fetcher: typeof fetch =
+      base.origin === this.env.INSTALLER_ORIGIN
+        ? (input, init) => this.env.ASSETS.fetch(new Request(input, init))
+        : fetch;
+    return downloadRelease(base.href, this.env.RELEASE_PUBLIC_KEY, fetcher);
   }
   private async api<T>(
     state: Install,
@@ -379,10 +390,7 @@ export class Installation extends DurableObject<InstallerEnv> {
           );
           state.subdomain = subdomain.subdomain;
           // Validate the pinned release before creating account resources.
-          const release = await downloadRelease(
-            this.env.RELEASE_BASE_URL,
-            this.env.RELEASE_PUBLIC_KEY,
-          );
+          const release = await this.release();
           state.version = release.signed.manifest.version;
           state.releaseDigest = await sha256(
             canonical(release.signed.manifest),
@@ -417,10 +425,7 @@ export class Installation extends DurableObject<InstallerEnv> {
           state.handoff = randomToken();
           state.step = "publisher";
         } else if (state.step === "publisher") {
-          const release = await downloadRelease(
-            this.env.RELEASE_BASE_URL,
-            this.env.RELEASE_PUBLIC_KEY,
-          );
+          const release = await this.release();
           requireThat(
             release.signed.manifest.version === state.version &&
               (await sha256(canonical(release.signed.manifest))) ===
@@ -567,7 +572,7 @@ export class Installation extends DurableObject<InstallerEnv> {
                   "Content-Type": "application/json",
                 },
                 body: JSON.stringify(credential),
-                redirect: "error",
+                redirect: "manual",
                 signal: AbortSignal.timeout(15000),
               },
             );

@@ -115,7 +115,6 @@ export function installationPage(
         <p class="hero-description">${e(subtitle)}</p>
         <div class="installation-action">${action}</div>
         <p class="action-context">${e(context)}</p>
-        ${state.expires && state.step !== "complete" ? `<p class="action-context">Authorization window ends at <time datetime="${new Date(state.expires).toISOString()}">${e(new Date(state.expires).toUTCString())}</time>.</p>` : ""}
       </section>
       <figure class="tile art-tile">
         <img class="launch-art" src="/design/publisher-technicolor.webp" alt="Glowing chat bubbles flowing into a browser above a connected world" width="1920" height="1080" fetchpriority="high">

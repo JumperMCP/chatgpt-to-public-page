@@ -9,8 +9,10 @@ const sessionId = "a".repeat(64);
 const key = "11".repeat(32);
 async function fixture(
   outboundService?: (request: Request) => Promise<Response>,
+  hostedAssets?: (request: Request) => Promise<Response>,
 ) {
   const script = await readFile("dist/installer/worker.js", "utf8");
+  const config = JSON.parse(await readFile("wrangler.installer.jsonc", "utf8"));
   const mf = new Miniflare(
     convertV4MiniflareOptions({
       modules: true,
@@ -31,11 +33,16 @@ async function fixture(
         INSTALLER_KEY: key,
         CLIENT_ID: "test-client",
         REQUIRED_SCOPES: '["account-settings.read"]',
-        RELEASE_BASE_URL: "https://release.test/",
-        RELEASE_PUBLIC_KEY: "test",
+        RELEASE_BASE_URL: hostedAssets
+          ? origin + "/releases/0.1.1/"
+          : "https://release.test/",
+        RELEASE_PUBLIC_KEY: hostedAssets
+          ? config.vars.RELEASE_PUBLIC_KEY
+          : "test",
         REFRESH_HANDOFF_VERIFIED: "false",
       },
       outboundService,
+      serviceBindings: hostedAssets ? { ASSETS: hostedAssets } : undefined,
     }),
   );
   const namespace = await mf.getDurableObjectNamespace("INSTALLATIONS");
@@ -44,6 +51,7 @@ async function fixture(
     advance(): Promise<void>;
     snapshot(): Promise<{
       step: string;
+      error?: string;
       credential?: unknown;
       expires: number;
     }>;
@@ -203,5 +211,60 @@ test("fresh authorization resets the window instead of inheriting idle-page expi
     assert.match(html, /Resume installation/);
   } finally {
     await mf.dispose();
+  }
+});
+
+test("preflight verifies hosted release assets without fetching its own public domain", async () => {
+  for (const corrupt of [false, true]) {
+    const assetPaths: string[] = [];
+    let publicCalls = 0;
+    const { mf, stub } = await fixture(
+      async (request) => {
+        publicCalls++;
+        assert.equal(
+          new URL(request.url).hostname,
+          "api.cloudflare.com",
+          "release files must use ASSETS rather than public fetch",
+        );
+        return Response.json({ success: true, result: { subdomain: "test" } });
+      },
+      async (request) => {
+        const path = new URL(request.url).pathname;
+        assetPaths.push(path);
+        assert.ok(
+          [
+            "/releases/0.1.1/release.json",
+            "/releases/0.1.1/worker.js",
+          ].includes(path),
+        );
+        const bytes = await readFile("public" + path);
+        if (corrupt && path.endsWith("worker.js")) bytes[0] ^= 1;
+        return new Response(bytes);
+      },
+    );
+    try {
+      await stub.seed({
+        id: "assets",
+        csrf: "csrf",
+        step: "preflight",
+        account: "test-account",
+        expires: Date.now() + 60000,
+        credential: await encrypt(
+          { access_token: "test-only", scopes: [] },
+          key,
+        ),
+      });
+      await stub.advance();
+      const state = await stub.snapshot();
+      assert.equal(publicCalls, 1);
+      assert.deepEqual(assetPaths, [
+        "/releases/0.1.1/release.json",
+        "/releases/0.1.1/worker.js",
+      ]);
+      assert.equal(state.step, corrupt ? "preflight" : "storage");
+      assert.equal(Boolean(state.error), corrupt);
+    } finally {
+      await mf.dispose();
+    }
   }
 });

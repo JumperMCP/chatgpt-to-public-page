@@ -111,3 +111,11 @@ The tester reached account selection, then saw preflight remain spinning and eve
 The installer now reads existing progress without joining the mutation queue, refreshes active progress every five seconds, stops refreshing on failure, and offers a same-origin/CSRF-protected restart even after expiry. Restart erases the abandoned authorization but does not delete any Cloudflare resources. Authorization establishes a fresh bounded one-hour window (capped by the token expiry); waiting on the initial landing page no longer consumes that authorization window. The deadline is shown in UTC. Cloudflare failures show HTTP status and numeric error codes without exposing provider response bodies or credentials.
 
 The precise timing of the tester's early expiry has not been established from the available evidence; the confirmed errors and recovery paths have regression coverage.
+
+## Workers rejects `redirect: "error"`
+
+Independent installation stopped at “Release metadata is invalid.” The public release passed download and signature checks in Node. A real workerd preflight regression exposed `TypeError: Invalid redirect value, must be one of "follow" or "manual"`. The failure happened before reading the release; a broad parse-error catch mislabeled it as malformed JSON.
+
+Release downloads and credential handoff now use `redirect: "manual"` and reject every non-2xx response, preserving the no-redirect requirement. Transport failures and malformed metadata have separate errors. Hosted installer releases use the ASSETS binding directly; signature/checksum validation still rejects modified bundles. Tests cover successful verification inside workerd, corrupted modules, transport errors, malformed JSON, and redirect rejection.
+
+Removed the visible UTC authorization deadline. Expiry remains enforced server-side, and the expiry page explains the action to take in plain language.
