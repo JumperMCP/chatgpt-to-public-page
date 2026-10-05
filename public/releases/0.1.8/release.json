@@ -1,0 +1,20 @@
+{
+  "manifest": {
+    "version": "0.1.8",
+    "commit": "935df265468c94aaf731aef0e7e6da435b65e854",
+    "schema": 1,
+    "migration_tag": "v1",
+    "durable_object_class": "Publisher",
+    "compatibility_date": "2026-09-01",
+    "modules": [
+      {
+        "name": "worker.js",
+        "sha256": "911776a9c712a40d95981b486f7a27f66872aaa8de964e3b9284fdafb5dffa38",
+        "size": 1806450,
+        "type": "application/javascript+module"
+      }
+    ],
+    "notes": "# 0.1.8 — allow updates while publication retries are pending\n\nRemove the update admission guard that rejected every pending publication. A retrying activation could otherwise prevent installing the very update needed to repair or diagnose it. Publisher already serializes owner requests and alarms, prioritizes queued updates, and resumes stored publication operations after the update completes or fails.\n\nThe runtime regression reproduces the old busy error and checks authenticated update admission, CSRF rejection, update priority, preservation of pending operation state and uploaded bytes, and resumption after both successful and failed updates. No migration or credential changes. Includes the publication reconciliation and safe Cloudflare diagnostics from 0.1.7.\n"
+  },
+  "signature": "QZbId8bpSsngJx9s2SFMpxzUfHFlWmKNxmtmQTAos62GrFkNkbrf38bORfHvWRS3PuiS8lhABm5wUqPUz5SdCA=="
+}

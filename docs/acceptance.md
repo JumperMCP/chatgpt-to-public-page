@@ -106,3 +106,5 @@ The tester supplied `tmp/tool-call-data.json`. It confirms successful authentica
 ## Pending publication/update deadlock — 2026-10-05
 
 The tester could not apply an update because an activation retry remained pending. The real Worker route reproduced the exact busy error. Version 0.1.8 removes the redundant admission guard while retaining serialized execution and update priority. Runtime coverage verifies CSRF rejection, retained operation/file data, and publication resumption after both update outcomes. This local evidence does not establish the tester's underlying Cloudflare rejection or successful live activation; the existing installation requires the documented one-time guard repair.
+
+Release 0.1.8 was built and signed from clean source commit `935df265468c94aaf731aef0e7e6da435b65e854`. Type checks, formatting, 36 Node/runtime tests, and two browser tests passed. This is a local signed release; CI provenance has not been issued.
