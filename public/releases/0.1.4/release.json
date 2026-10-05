@@ -1,0 +1,20 @@
+{
+  "manifest": {
+    "version": "0.1.4",
+    "commit": "2e2a8eab7e6facfc7c082eccb94dba165c9e59f0",
+    "schema": 1,
+    "migration_tag": "v1",
+    "durable_object_class": "Publisher",
+    "compatibility_date": "2026-09-01",
+    "modules": [
+      {
+        "name": "worker.js",
+        "sha256": "921e90f7b0ae5a4516a37545bebf63c97b673a900f646caea5df2414e8d5a7a4",
+        "size": 1805714,
+        "type": "application/javascript+module"
+      }
+    ],
+    "notes": "# 0.1.4 — recoverable ChatGPT connection errors\n\nOAuth authorization validation errors now show the provider's public error description and code, with a link to retry the consent request. Previously these expected failures appeared as a generic internal error. Incorrect owner passwords and login throttling keep the sign-in form and ChatGPT connection destination, without retaining the password.\n\nThe exact stable ChatGPT callback has been observed by the independent tester and configured for new installations. The tester confirmed dynamic client registration succeeds after configuring it; live consent and token exchange remain unverified. This release improves diagnosis and recovery; it does not claim to resolve the still-unidentified live authorization failure.\n\nNo storage migration, password reset, or relaxation of callback, PKCE, scope, or owner authentication checks. Existing passwords and projects remain intact.\n"
+  },
+  "signature": "7vYLT84ADjZ7De2SHk5cwNeH+ktjXjt9OtFAZkSIzazvrXqDUf1e47Br15gMmxD6Hx0En1KnskR2TKWEAUrrAg=="
+}
