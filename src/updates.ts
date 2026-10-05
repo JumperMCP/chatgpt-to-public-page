@@ -96,26 +96,36 @@ export class Updates {
     const name = new URL(this.env.PUBLISHER_ORIGIN).hostname.split(".")[0],
       path = "/workers/scripts/" + encodeURIComponent(name);
     try {
-      if (op.state === "deploying") {
-        const deployments = await this.api.api<{
-          deployments: {
-            versions: { version_id: string; percentage: number }[];
-          }[];
-        }>(path + "/deployments");
-        const active = deployments.deployments[0]?.versions.find(
-          (v) => v.percentage === 100,
-        );
-        if (active) {
-          const version = await this.api.api<{
-            metadata: { annotations?: Record<string, string> };
-          }>(path + "/versions/" + active.version_id);
-          if (version.metadata.annotations?.["workers/message"] === op.id) {
-            op.state = "complete";
-            this.store.put("publisher-update", op);
-            return;
-          }
-        }
+      const deployments = await this.api.api<{
+        deployments: {
+          versions: { version_id: string; percentage: number }[];
+        }[];
+      }>(path + "/deployments");
+      const versions = deployments.deployments[0]?.versions ?? [];
+      requireThat(
+        versions.length === 1 && versions[0].percentage === 100,
+        "ambiguous_deployment",
+        "Publisher updates require one active version serving all traffic.",
+      );
+      const version = await this.api.api<{
+        annotations?: Record<string, string>;
+        resources?: { script_runtime?: { migration_tag?: string } };
+      }>(path + "/versions/" + encodeURIComponent(versions[0].version_id));
+      if (
+        op.state === "deploying" &&
+        version.annotations?.["workers/message"] === op.id
+      ) {
+        op.state = "complete";
+        delete op.error;
+        this.store.put("publisher-update", op);
+        return;
       }
+      const migrationTag = version.resources?.script_runtime?.migration_tag;
+      requireThat(
+        typeof migrationTag === "string" && migrationTag.length > 0,
+        "migration_unavailable",
+        "Cloudflare did not return the active version's migration tag. No update was uploaded.",
+      );
       const modules = new Map<string, Uint8Array>();
       for (const entry of op.release.manifest.modules) {
         const bytes = new Uint8Array(entry.size);
@@ -137,9 +147,12 @@ export class Updates {
       await verifyRelease(op.release, modules, this.env.RELEASE_PUBLIC_KEY!);
       const settings = await this.api.api<{
         bindings: { name: string; type: string }[];
-        migration_tag: string;
       }>(path + "/settings");
-      const metadata = updateMetadata(op.release.manifest, settings, op.id);
+      const metadata = updateMetadata(
+        op.release.manifest,
+        { ...settings, migration_tag: migrationTag },
+        op.id,
+      );
       const form = new FormData();
       form.set("metadata", JSON.stringify(metadata));
       for (const entry of op.release.manifest.modules)

@@ -1,7 +1,7 @@
-# 0.1.5 — repair native Workers fetch calls
+# 0.1.6 — read actual Cloudflare update metadata
 
-Fixes Cloudflare API requests and public-site reachability probes invoking Workers native fetch with the adapter as its receiver. The runtime rejects this with an Illegal invocation TypeError. In the updater, this failed before uploading the new bundle and was displayed as a generic operation failure.
+The updater now reads the migration tag from the active Worker's version (`resources.script_runtime.migration_tag`), rather than from `/settings`, where Cloudflare does not return it. Completion reconciliation reads the version's top-level `annotations`. Both response shapes were verified against the live operator Worker and Cloudflare's API schema.
 
-A real Workers-runtime regression now covers authenticated API calls and unauthenticated site probes. Previous Node tests used injected fetch functions and missed the runtime receiver constraint. Includes 0.1.4's owner sign-in and consent error recovery.
+A missing tag, a different migration tag, or a deployment splitting traffic across versions still blocks upload. Successful reconciliation clears a stale upload error and avoids a duplicate upload after a lost response. Regression tests now use Cloudflare's actual response shape instead of invented settings fields.
 
-Existing affected Publishers require a one-time dashboard repair before the built-in updater can install this release. No storage migration, password reset, or changes to authentication policy. The live ChatGPT consent failure remains to be diagnosed after this update reaches the independent installation.
+Includes the 0.1.5 native-fetch repair and 0.1.4 consent diagnostics. Existing old updaters need the documented bootstrap correction; changing the release version label or migration tags does not fix them. No schema migration, password reset, or authentication-policy changes. Independent update completion and ChatGPT consent remain pending.

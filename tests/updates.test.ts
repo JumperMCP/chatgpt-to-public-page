@@ -55,6 +55,8 @@ test("self-update interruption reconciles the activated version without reupload
     await encrypt({ token: "still-decrypts" }, "11".repeat(32)),
   );
   let writes = 0;
+  let migrationTag: string | undefined = "v1";
+  let percentage = 100;
   const api = {
     async api<T>(path: string, method = "GET", body?: unknown): Promise<T> {
       if (method === "PUT") {
@@ -66,7 +68,6 @@ test("self-update interruption reconciles the activated version without reupload
       }
       if (path.endsWith("/settings"))
         return {
-          migration_tag: "v1",
           bindings: [
             { name: "PUBLISHER", type: "durable_object_namespace" },
             { name: "OAUTH_KV", type: "kv_namespace" },
@@ -76,11 +77,19 @@ test("self-update interruption reconciles the activated version without reupload
       if (path.endsWith("/deployments"))
         return {
           deployments: [
-            { versions: [{ version_id: "new-version", percentage: 100 }] },
+            {
+              versions: [
+                {
+                  version_id: writes ? "new-version" : "old-version",
+                  percentage,
+                },
+              ],
+            },
           ],
         } as T;
       return {
-        metadata: { annotations: { "workers/message": "update" } },
+        annotations: writes ? { "workers/message": "update" } : {},
+        resources: { script_runtime: { migration_tag: migrationTag } },
       } as T;
     },
   };
@@ -95,6 +104,23 @@ test("self-update interruption reconciles the activated version without reupload
   await new Updates(store, env, api).step();
   assert.equal(updates.current()?.state, "complete");
   assert.equal(writes, 1);
+  for (const [tag, share, code] of [
+    ["v2", 100, "incompatible_migration"],
+    [undefined, 100, "migration_unavailable"],
+    ["v1", 50, "ambiguous_deployment"],
+  ] as const) {
+    migrationTag = tag;
+    percentage = share;
+    store.put("publisher-update", { ...op, state: "queued" });
+    await updates.step();
+    assert.equal(updates.current()?.state, "failed");
+    assert.equal(updates.current()?.error?.code, code);
+    assert.equal(
+      writes,
+      1,
+      "must not upload when compatibility cannot be established",
+    );
+  }
   assert.deepEqual(store.get("project:untouched"), { name: "existing-site" });
   assert.deepEqual(await decrypt(store.get("credential")!, "11".repeat(32)), {
     token: "still-decrypts",
