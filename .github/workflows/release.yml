@@ -1,0 +1,46 @@
+name: Build signed release
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+  id-token: write
+  attestations: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    environment: release
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npm run check && npm run format:check
+      - run: npm run build && npm run build:installer
+      - run: npm test
+      - name: Sign verified bundle
+        env:
+          RELEASE_SIGNING_KEY: ${{ secrets.RELEASE_SIGNING_KEY }}
+        shell: bash
+        run: |
+          umask 077
+          key_file="$RUNNER_TEMP/publisher-release-key.pem"
+          printf '%s' "$RELEASE_SIGNING_KEY" > "$key_file"
+          trap 'rm -f "$key_file"' EXIT
+          RELEASE_SIGNING_KEY_FILE="$key_file" npm run release
+      - uses: actions/attest-build-provenance@v3
+        with:
+          subject-path: |
+            dist/worker.js
+            dist/release.json
+            dist/installer/worker.js
+      - uses: actions/upload-artifact@v4
+        with:
+          name: publisher-${{ github.sha }}
+          path: |
+            dist/worker.js
+            dist/release.json
+            dist/SHA256SUMS
+            dist/installer/worker.js
+          if-no-files-found: error

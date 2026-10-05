@@ -1,0 +1,1 @@
+"Have you recently replaced coding with prompting? Next: Replace clicks with no clicks!"

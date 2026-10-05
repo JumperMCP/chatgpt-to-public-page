@@ -1,0 +1,10 @@
+#user
+id_ed25519*
+
+node_modules/
+dist/
+.wrangler/
+.dev.vars*
+.env*
+!.env.example
+coverage/

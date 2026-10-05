@@ -1,0 +1,20 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "chatgpt-publisher",
+  "main": "src/worker.ts",
+  "compatibility_date": "2026-09-01",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "durable_objects": { "bindings": [{ "name": "PUBLISHER", "class_name": "Publisher" }] },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["Publisher"] }],
+  "kv_namespaces": [{ "binding": "OAUTH_KV", "id": "REPLACE_WITH_OWN_NAMESPACE_ID" }],
+  "vars": {
+    "PUBLISHER_ORIGIN": "https://chatgpt-publisher.REPLACE.workers.dev",
+    "ACCOUNT_ID": "REPLACE",
+    "ACCOUNT_SUBDOMAIN": "REPLACE",
+    "INSTALLATION_ID": "REPLACE_WITH_RANDOM_UUID",
+    "CHATGPT_CALLBACKS": "[]",
+    "FILE_DOWNLOAD_HOSTS": "[]",
+    "RELEASE_VERSION": "0.1.0"
+  },
+  "observability": { "enabled": false }
+}

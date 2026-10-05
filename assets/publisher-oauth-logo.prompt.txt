@@ -1,0 +1,3 @@
+Built-in image generation.
+
+Use case: logo-brand. Create one polished square OAuth application icon for Publisher by Jumper MCP, a tool that publishes reviewed chat artifacts as public websites. An original minimalist black and white geometric symbol combining a document/browser page with an upward-right publishing arrow, with a subtly distinctive P silhouette. Strong simple shapes, carefully balanced negative space, crisp flat edges, generous padding, recognizable at 32 pixels. Monochrome black mark centered on solid white square background. No words, no letters as separate text, no gradients, shadows, 3D, mockup scene, border or watermark. Deliver a single ready-to-upload square PNG logo.
