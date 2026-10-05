@@ -125,3 +125,7 @@ Removed the visible UTC authorization deadline. Expiry remains enforced server-s
 The tester had to allow approximately five automatic redirects before reaching owner setup. Removed meta-refresh. A same-origin script now reads progress and replaces the main content in place, stops on completion/errors, and offers manual refresh after repeated network failures. A real Chromium regression verifies the complete transition with only the initial navigation; Firefox’s reported redirect mechanism is no longer used.
 
 The independent tester reached owner setup and obtained the installation receipt/MCP URL. Their ChatGPT subscription does not expose custom MCP creation. An eligible ChatGPT account can connect to that independent Cloudflare installation; the exact callback allowlist remains to be verified. See https://developers.openai.com/plugins/deploy/connect-chatgpt .
+
+## Workers native fetch must not receive an adapter as `this`
+
+2026-10-05: the independent Publisher self-update failed before upload with a generic error. `this.fetcher(url)` where `fetcher` was assigned global `fetch` throws Workers `TypeError: Illegal invocation`. Node tests with injected arrow-function mocks did not expose it. Copy the stored function to a local variable and call `fetcher(url)`; site reachability probes need the same fix. `tests/cloudflare-runtime.test.ts` exercises both paths through the bundled adapter in workerd. For old deployments, the one-line constructor wrapper and signed 0.1.5 update procedure are in `docs/operator-setup.md`.

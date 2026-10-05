@@ -1,0 +1,20 @@
+{
+  "manifest": {
+    "version": "0.1.5",
+    "commit": "19cd582c4d56d6dea7819e164dfb165ef52fc534",
+    "schema": 1,
+    "migration_tag": "v1",
+    "durable_object_class": "Publisher",
+    "compatibility_date": "2026-09-01",
+    "modules": [
+      {
+        "name": "worker.js",
+        "sha256": "3aa90cc189f2bdfb983f920340b549ffa782eea28ab20d29dfb29a58d0570f03",
+        "size": 1805774,
+        "type": "application/javascript+module"
+      }
+    ],
+    "notes": "# 0.1.5 — repair native Workers fetch calls\n\nFixes Cloudflare API requests and public-site reachability probes invoking Workers native fetch with the adapter as its receiver. The runtime rejects this with an Illegal invocation TypeError. In the updater, this failed before uploading the new bundle and was displayed as a generic operation failure.\n\nA real Workers-runtime regression now covers authenticated API calls and unauthenticated site probes. Previous Node tests used injected fetch functions and missed the runtime receiver constraint. Includes 0.1.4's owner sign-in and consent error recovery.\n\nExisting affected Publishers require a one-time dashboard repair before the built-in updater can install this release. No storage migration, password reset, or changes to authentication policy. The live ChatGPT consent failure remains to be diagnosed after this update reaches the independent installation.\n"
+  },
+  "signature": "NtVWdPujlt/aMlLVgTWiR6vqf5EPFkPrzpiQtTZ44ZGcbgvul0OsEXAr8yK/5ZESDf+/x2avpmPsSVkLc/HCCw=="
+}

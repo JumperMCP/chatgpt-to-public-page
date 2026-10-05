@@ -201,3 +201,19 @@ The tester confirmed the stable URI in the New Plugin dialog on 2026-10-05. For 
 Release `/releases/0.1.4/` is signed from clean source `2e2a8eab7e6facfc7c082eccb94dba165c9e59f0`. All 33 automated tests and two native browser tests passed. OAuth validation errors now show a public description/code and a same-origin retry link; incorrect passwords retain the sign-in form and ChatGPT connection destination. The exact live consent failure remains unconfirmed, so this is a recovery/diagnostic fix, not evidence of successful ChatGPT authorization.
 
 If refreshing the tester's `/authorize` page still fails, update the existing Publisher to obtain the actionable error: in the Worker's Cloudflare Settings → Variables and Secrets, set `RELEASE_BASE_URL` to `https://chatgpt-to-public.jumpermcp.dev/releases/0.1.4/`, save/deploy, then open the Publisher homepage and select Check for updates → review 0.1.4 → Update Publisher. A connected publishing API token is required for self-update. Preserve `CHATGPT_CALLBACKS` and all other secrets/bindings. Return to ChatGPT and start Connect again; record only the visible public error, never the authorization query string. Existing passwords and projects are preserved. Live self-update remains an acceptance experiment. This release is locally signed; GitHub provenance is still pending.
+
+### Repair the old updater once, then install 0.1.5
+
+The independent tester's update to 0.1.4 failed before uploading code. Its old adapter invokes native Workers `fetch` with an object receiver, which throws `TypeError: Illegal invocation`. Both the isolated native-fetch reproduction and the bundled adapter runtime test reproduce this. A failed updater cannot install its own repair.
+
+In the tester's Cloudflare account, open Workers & Pages → `publisher-c047d890` → Edit code. In `worker.js`, find the single line `this.fetcher = fetcher;` in the Cloudflare adapter constructor and replace it with:
+
+```js
+this.fetcher = (...args) => fetcher(...args);
+```
+
+Deploy that one-line repair. It preserves all bindings, secrets, owner passwords and project data. The exact wrapper was checked in workerd and changed the native fetch reproduction from HTTP 500 (Illegal invocation) to HTTP 200. This temporary edit is then replaced by the signed release below.
+
+In Settings → Variables and Secrets, set `RELEASE_BASE_URL` to `https://chatgpt-to-public.jumpermcp.dev/releases/0.1.5/` and save/deploy. In Publisher, select Check for updates, review **0.1.5**, and Update Publisher. Confirm both **Update state: complete** and **Publisher 0.1.5** before retrying ChatGPT connection. Do not manually change `RELEASE_VERSION` to make an unsuccessful update look complete. If it fails, copy the visible error; do not keep retrying or reset the password.
+
+Release 0.1.5 is signed from clean source `19cd582c4d56d6dea7819e164dfb165ef52fc534`. All 34 automated tests and two browser tests pass. Includes the 0.1.4 consent-error recovery improvements. The tester's actual OAuth consent failure remains unconfirmed until the corrected version runs. Previous archives remain intact; signing is local and GitHub provenance remains pending.
