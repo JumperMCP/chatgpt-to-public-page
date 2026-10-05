@@ -11,6 +11,7 @@ import { exactOrigin } from "../../src/security";
 // cannot detect Referrer-Policy suppression or CSP redirect failures.
 test("native installer and owner forms preserve Origin and permit OAuth navigation", async () => {
   let origin = "";
+  let callbackOrigin = "";
   let submittedOrigin: string | undefined;
   const server = createServer(async (req, res) => {
     if (req.method === "POST") {
@@ -26,15 +27,20 @@ test("native installer and owner forms preserve Origin and permit OAuth navigati
         res.writeHead(303, {
           Location:
             req.url === "/start"
-              ? "https://dash.cloudflare.com/oauth2/auth"
+              ? callbackOrigin + "/oauth2/auth"
               : req.url === "/approve"
-                ? "https://chatgpt.example/callback?code=test"
+                ? callbackOrigin + "/callback?code=test"
                 : "/success",
         });
       } catch {
         res.writeHead(403);
       }
       res.end();
+      return;
+    }
+    if (req.headers.host?.startsWith("localhost:")) {
+      res.writeHead(200, { "Content-Type": "text/html" });
+      res.end("Local OAuth destination");
       return;
     }
     const response =
@@ -46,7 +52,7 @@ test("native installer and owner forms preserve Origin and permit OAuth navigati
               form("/approve", "browser-csrf", "<button>Approve</button>"),
               200,
               {},
-              "https://chatgpt.example/callback",
+              callbackOrigin + "/callback",
             )
           : req.url === "/success"
             ? new Response("Saved")
@@ -54,7 +60,20 @@ test("native installer and owner forms preserve Origin and permit OAuth navigati
                 { step: "authorize", csrf: "browser-csrf" },
                 false,
               );
-    res.writeHead(response.status, Object.fromEntries(response.headers));
+    // Redirected requests bypass Playwright's route stubs. Use a second
+    // loopback origin so the browser exercises real redirects without network.
+    const headers = new Headers(response.headers);
+    const policy = headers.get("Content-Security-Policy");
+    if (req.url === "/" && policy) {
+      assert.ok(
+        policy.includes("form-action 'self' https://dash.cloudflare.com;"),
+      );
+      headers.set(
+        "Content-Security-Policy",
+        policy.replace("https://dash.cloudflare.com", callbackOrigin),
+      );
+    }
+    res.writeHead(response.status, Object.fromEntries(headers));
     res.end(await response.text());
   });
   server.listen(0, "127.0.0.1");
@@ -62,22 +81,13 @@ test("native installer and owner forms preserve Origin and permit OAuth navigati
   const address = server.address();
   assert.ok(address && typeof address !== "string");
   origin = `http://127.0.0.1:${address.port}`;
+  callbackOrigin = `http://localhost:${address.port}`;
   const browser = await chromium.launch({
     executablePath: process.env.BROWSER_EXECUTABLE_PATH,
     args: ["--no-sandbox"],
   });
   try {
     const tab = await browser.newPage();
-    await tab.route("https://dash.cloudflare.com/**", (route) =>
-      route.fulfill({
-        status: 200,
-        contentType: "text/html",
-        body: "Cloudflare consent",
-      }),
-    );
-    await tab.route("https://chatgpt.example/**", (route) =>
-      route.fulfill({ status: 200, body: "Connected" }),
-    );
     await tab.goto(origin);
     const submission = tab.waitForResponse(
       (r) => r.url() === origin + "/start",
@@ -89,14 +99,16 @@ test("native installer and owner forms preserve Origin and permit OAuth navigati
       origin,
       "browser-native POST must retain the actual Origin",
     );
-    await tab.waitForURL("https://dash.cloudflare.com/**", { timeout: 3000 });
+    await tab.waitForURL(callbackOrigin + "/oauth2/auth", { timeout: 3000 });
     await tab.goto(origin + "/owner");
     await tab.getByRole("button", { name: "Save" }).click();
     await tab.waitForURL(origin + "/success");
     assert.equal(submittedOrigin, origin);
     await tab.goto(origin + "/consent");
     await tab.getByRole("button", { name: "Approve" }).click();
-    await tab.waitForURL("https://chatgpt.example/**", { timeout: 3000 });
+    await tab.waitForURL(callbackOrigin + "/callback?code=test", {
+      timeout: 3000,
+    });
     for (const invalidOrigin of ["null", "https://attacker.example"]) {
       const r = await tab.request.post(origin + "/start", {
         headers: { Origin: invalidOrigin },
