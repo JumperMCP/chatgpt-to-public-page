@@ -112,3 +112,5 @@ Release 0.1.8 was built and signed from clean source commit `935df265468c94aaf73
 ## Update succeeded, publication still pending — 2026-10-05
 
 The tester confirmed the 0.1.8 update succeeded. The project remained private and ChatGPT repeated the earlier generic provider-error explanation. Requested the exact current Recent operations diagnostic and displayed Publisher version; activation remains unverified. Independently reproduced a timer starvation defect through the actual MCP get_operation route: every poll postponed an existing retry alarm. Version 0.1.9 preserves earlier deadlines while advancing distant alarms. This local finding does not identify the tester's Cloudflare rejection.
+
+Release 0.1.9 was built and signed from clean source `caf506200251a02a3a7a3b3a96985c0133829fc8`. Type checks, formatting, 36 Node/runtime tests and two browser tests passed. Local signing does not constitute CI provenance.

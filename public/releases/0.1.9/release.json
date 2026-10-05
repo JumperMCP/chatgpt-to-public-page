@@ -1,0 +1,20 @@
+{
+  "manifest": {
+    "version": "0.1.9",
+    "commit": "caf506200251a02a3a7a3b3a96985c0133829fc8",
+    "schema": 1,
+    "migration_tag": "v1",
+    "durable_object_class": "Publisher",
+    "compatibility_date": "2026-09-01",
+    "modules": [
+      {
+        "name": "worker.js",
+        "sha256": "1367905f433334460ed695de856bc3f8b15ddbe013b9293c90c14ff25f07ccad",
+        "size": 1806565,
+        "type": "application/javascript+module"
+      }
+    ],
+    "notes": "# 0.1.9 — status polling must not postpone publication retries\n\nMCP calls previously reset the next alarm to a full retry interval from the current time. Repeated status checks could postpone publication indefinitely. Scheduling now preserves an earlier alarm while still moving distant alarms forward when work is queued.\n\nThe workerd regression calls the actual authenticated MCP get_operation route and verifies the retry deadline is preserved. It also checks moving a distant alarm earlier and retains the update/publishing pause-resume coverage. No migration or credential changes.\n\nThe independent tester confirmed the 0.1.8 update succeeded but the site remained private. This scheduling correction does not establish the cause of Cloudflare's activation rejection; obtain the current Recent operations endpoint/status/code diagnostics before changing account settings or permissions.\n"
+  },
+  "signature": "v+DwrksuBdF016MphCcYm84RMVr57aZVeFDNOa4Dk72ziLNXkExNrIqpB4HwI/69PGCNuViCH+jfDilBOlhOAA=="
+}

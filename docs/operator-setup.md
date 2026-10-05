@@ -269,3 +269,9 @@ requireThat(
 Leave `this.updates.request(...)`, `this.schedule()`, and the preceding authentication/CSRF checks in place. Deploy the edited version and verify it serves all traffic. Set `RELEASE_BASE_URL` to `https://chatgpt-to-public.jumpermcp.dev/releases/0.1.8/` and deploy that configuration on top of the patched version. Leave `RELEASE_VERSION` unchanged: the updater sets it after installing the bundle. Check for updates, review 0.1.8, and apply it.
 
 This is safe between steps because Publisher serializes requests and alarms. Updates take priority; the existing stored publication resumes after the update settles. Do not delete the project or change its operation state. Once the update completes, inspect the existing publication's next result; any remaining Cloudflare failure now includes its method/path, HTTP status, and numeric provider codes. Local runtime coverage confirms operation/file preservation and resumption after both successful and failed updates. Independent-account confirmation remains pending.
+
+## 0.1.9: preserve retry timers during status checks
+
+The independent tester confirmed the 0.1.8 update succeeded. A separate runtime regression found that MCP status calls reset retry alarms and could keep deferring publication. The 0.1.9 scheduler preserves earlier alarms. For an installation already running 0.1.8, set `RELEASE_BASE_URL` to `https://chatgpt-to-public.jumpermcp.dev/releases/0.1.9/`, deploy that configuration, and use the normal reviewed update. No code edit is needed; leave `RELEASE_VERSION` to the updater.
+
+This does not establish the underlying Cloudflare activation error. Obtain the displayed Publisher version and the exact Recent operations entry, including method/path, HTTP status and numeric codes. “Private / unpublished” describes project visibility, not whether its operation is retrying. Record actual provider diagnostics rather than ChatGPT's paraphrase.
