@@ -1,20 +1,55 @@
 {
- "$schema":"node_modules/wrangler/config-schema.json",
- "name":"chatgpt-to-public-installer",
- "main":"src/installer/worker.ts",
- "compatibility_date":"2026-09-01",
- "compatibility_flags":["nodejs_compat","global_fetch_strictly_public"],
- "durable_objects":{"bindings":[{"name":"INSTALLATIONS","class_name":"Installation"}]},
- "migrations":[{"tag":"v1","new_sqlite_classes":["Installation"]}],
- "vars":{
-  "INSTALLER_ORIGIN":"https://chatgpt-to-public.jumpermcp.dev",
-  "CLIENT_ID":"af114d63e7199023c165b59009ffb38d",
-  "REQUIRED_SCOPES":"[\"account-settings.read\",\"workers-scripts.write\",\"workers-kv-storage.write\"]",
-  "RELEASE_BASE_URL":"https://REPLACE_WITH_PINNED_RELEASE/",
-  "RELEASE_PUBLIC_KEY":"J8n5q/f3GMMG0dX27iwZxYx9K5+QLDbbRl/yQiwy/9M=",
-  "CHATGPT_CALLBACKS":"[]",
-  "FILE_DOWNLOAD_HOSTS":"[]",
-  "REFRESH_HANDOFF_VERIFIED":"false"
- },
- "observability":{"enabled":false}
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "chatgpt-to-public-installer",
+  "main": "src/installer/worker.ts",
+  "compatibility_date": "2026-09-01",
+  "compatibility_flags": [
+    "nodejs_compat",
+    "global_fetch_strictly_public"
+  ],
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "INSTALLATIONS",
+        "class_name": "Installation"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": [
+        "Installation"
+      ]
+    }
+  ],
+  "vars": {
+    "INSTALLER_ORIGIN": "https://chatgpt-to-public.jumpermcp.dev",
+    "CLIENT_ID": "af114d63e7199023c165b59009ffb38d",
+    "REQUIRED_SCOPES": "[\"account-settings.read\",\"workers-scripts.write\",\"workers-kv-storage.write\"]",
+    "RELEASE_BASE_URL": "https://chatgpt-to-public.jumpermcp.dev/releases/0.1.0/",
+    "RELEASE_PUBLIC_KEY": "J8n5q/f3GMMG0dX27iwZxYx9K5+QLDbbRl/yQiwy/9M=",
+    "CHATGPT_CALLBACKS": "[]",
+    "FILE_DOWNLOAD_HOSTS": "[]",
+    "REFRESH_HANDOFF_VERIFIED": "false"
+  },
+  "observability": {
+    "enabled": false
+  },
+  "account_id": "a59597e6de9ff4db5364a9a24ec15524",
+  "workers_dev": false,
+  "preview_urls": false,
+  "routes": [
+    {
+      "pattern": "chatgpt-to-public.jumpermcp.dev",
+      "custom_domain": true,
+      "zone_name": "jumpermcp.dev"
+    }
+  ],
+  "assets": {
+    "directory": "./public",
+    "html_handling": "none",
+    "not_found_handling": "none",
+    "run_worker_first": false
+  }
 }

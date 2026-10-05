@@ -62,7 +62,7 @@ Create an Ed25519 signing key outside the repository, store the private key secu
 
 Configured on 2026-10-05 from the operator-provided SSH public key `id_ed25519_chatgpt-to-public.pub`. Its 32-byte Ed25519 public key was extracted and successfully imported with Web Crypto; `RELEASE_PUBLIC_KEY` now contains that raw key in base64. SSH fingerprint: `SHA256:Y4l70X4r8JwpPchts+vjZezbaXBA3kwtdKIKsuCn3x0`. The operator converted the private key to PKCS#8 PEM outside the repository. On 2026-10-05, a local check confirmed that the converted key matches the configured public key, a sign/verify round trip passed, and file permissions are 0600. No release has been signed yet. Independent fingerprint publication remains pending.
 
-From a clean committed source tree, install locked dependencies, run checks/tests, build, and run `npm run release`. Host `release.json`, `worker.js`, and `SHA256SUMS` in a versioned HTTPS directory that serves downloads without redirects. The manifest contains a source commit, schema/tag/class compatibility, checksums, and release notes. Archive the previous working bundle. The manual release workflow signs and attests both Worker bundles. Configure the protected `release` environment and its `RELEASE_SIGNING_KEY` secret before running it. No workflow has run and no provenance has yet been issued.
+From a clean committed source tree, install locked dependencies, run checks/tests, build, and run `npm run release`. Archive `release.json`, `worker.js`, and `SHA256SUMS` under `public/releases/<version>/`. The installer serves this directory as static assets at `https://chatgpt-to-public.jumpermcp.dev/releases/<version>/`, without redirects or installation cookies. Existing version directories are immutable: add a new version instead of replacing files. The manifest contains a source commit, schema/tag/class compatibility, checksums, and release notes. Archive the previous working bundle. The manual release workflow signs and attests both Worker bundles. Configure the protected `release` environment and its `RELEASE_SIGNING_KEY` secret before running it. No workflow has run and no provenance has yet been issued.
 
 Set these installer values:
 
@@ -121,3 +121,31 @@ configuration, preserves the original, and refuses to overwrite the destination.
 The output is an unencrypted PKCS#8 PEM with mode 0600, matching the current
 release signer's requirements. Keep it outside the repository. Conversion alone
 does not sign or publish a release.
+
+## Installer deployment
+
+The installer configuration includes the operator account, custom domain, and
+static release assets from `public/`. Worker preview URLs and `workers.dev` are
+disabled. The first archived release is `0.1.0`, signed from source commit
+`6886d79168e6e9d510e8f958d8cc5c3621c1bc4b`. Its source manifest remains unchanged.
+
+For the first deployment, generate `INSTALLER_KEY` as 32 random bytes encoded in
+hex and supply it using Wrangler's `deploy --secrets-file` option with a private
+temporary JSON file. Delete the temporary file afterward. Deployments preserve
+existing secrets; do not regenerate this key on routine updates because active
+installation grants depend on it.
+
+```bash
+npm run check
+npm run format:check
+npm run build
+npm run build:installer
+npm test
+npx wrangler deploy --config wrangler.installer.jsonc
+```
+
+Keep the static archive in deployments so older installed Publishers can still
+fetch their pinned release. Verify each file with redirects disabled and verify
+the downloaded manifest signature and module digest against the configured key.
+The root installer page must still create a private session; static release
+downloads must not create installation sessions.

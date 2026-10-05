@@ -1,0 +1,20 @@
+{
+  "manifest": {
+    "version": "0.1.0",
+    "commit": "6886d79168e6e9d510e8f958d8cc5c3621c1bc4b",
+    "schema": 1,
+    "migration_tag": "v1",
+    "durable_object_class": "Publisher",
+    "compatibility_date": "2026-09-01",
+    "modules": [
+      {
+        "name": "worker.js",
+        "sha256": "0586c58d9012dc2bc70071137326a0c8400e7a21854081a21f6caa352e4d629f",
+        "size": 1797189,
+        "type": "application/javascript+module"
+      }
+    ],
+    "notes": "# 0.1.0 — pre-release implementation\n\nIntroduces the owner Publisher Worker, SQLite project snapshots, static artifact validation, MCP editing/export/undo tools, resumable publication, a separate PKCE installer, and signed owner-approved updates.\n\nPublic launch remains blocked on the live-account and client experiments in `docs/acceptance.md`. Callback and artifact-host allowlists start empty. Independent refresh handoff is disabled by default, with an explicit owner-entered API-token fallback. No published release, deployment, video, or external compatibility claim accompanies this source-only implementation.\n"
+  },
+  "signature": "5m90TvJKP7x1ZLCiSi7NxB25CScHEKBy6s8mq3QxY08w6O94aM3CydRiMajTxHI0aX25uEBHN6zWkeNsmnoYDA=="
+}
