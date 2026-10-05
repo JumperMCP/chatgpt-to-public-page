@@ -95,3 +95,11 @@ method `none`, response type `code`, the expected callback and Client URL,
 verified domain, and public visibility. The response omitted `optional_scopes`;
 it confirms the scope list but does not independently expose optional-scope
 state. No independent GET readback or live authorization has been performed.
+
+## Native browser forms and security headers
+
+A real click on the installer failed with “This action must originate from your Publisher.” Chromium sent `Origin: null` under `Referrer-Policy: no-referrer`. An HTTP-client test with a manually supplied Origin missed this. `same-origin` preserves Origin for same-origin forms and suppresses referrers to external sites. See [MDN's Origin reference](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Origin).
+
+Chromium also applies `form-action` to redirects after POST. The installer permits `https://dash.cloudflare.com`; Publisher consent permits only the origin of the already validated callback. Normal owner forms remain self-only. Null and foreign Origin values remain rejected. `npm run test:browser` exercises these behaviors using actual rendered forms, with the external destinations stubbed; CI installs Chromium. For local system Chrome set `BROWSER_EXECUTABLE_PATH`.
+
+Cloudflare's auto-injected analytics beacon conflicts with the intentional script-blocking CSP and is unrelated to the Origin failure. HTML uses `Cache-Control: no-store, no-transform` to prevent proxy injection while retaining private session handling; see [Cloudflare response body inspection](https://developers.cloudflare.com/rules/configuration-rules/response-body-inspection/).

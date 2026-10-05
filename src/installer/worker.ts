@@ -86,7 +86,7 @@ export default {
       "Set-Cookie",
       `${cookieName}=${id}; Secure; HttpOnly; Path=/; SameSite=Lax; Max-Age=3600`,
     );
-    headers.set("Cache-Control", "no-store");
+    headers.set("Cache-Control", "no-store, no-transform");
     return new Response(response.body, { status: response.status, headers });
   },
 } satisfies ExportedHandler<InstallerEnv>;

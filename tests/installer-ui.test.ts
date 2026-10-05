@@ -11,7 +11,7 @@ test("installer presentation preserves forms and escapes provider-controlled con
   assert.match(html, /method="post" action="\/start"/);
   assert.match(html, /name="csrf" value="token&#34;&#60;&#38;"/);
   assert.match(html, /Install on my Cloudflare/);
-  assert.equal(start.headers.get("Cache-Control"), "no-store");
+  assert.equal(start.headers.get("Cache-Control"), "no-store, no-transform");
   assert.match(
     start.headers.get("Content-Security-Policy")!,
     /form-action 'self'/,

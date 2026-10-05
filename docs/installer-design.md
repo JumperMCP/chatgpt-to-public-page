@@ -43,3 +43,5 @@ The matching dark-mode image was generated with the same model and seed against 
 ## Artwork and palette revision
 
 The hero card now displays the user-supplied `marketing/linkedin-article-image/images/10-retro-krea2-technicolor.png`, optimized into a 1600px WebP (about 90 KB). All captions and previous sculpture imagery are removed from that card. The full landscape composition is preserved against a navy ground; on mobile the card follows the image's 16:9 ratio. Navy and teal-blue page colors echo the artwork, and the initial installation CTA is a jade-green pill with accessible light/dark variants. The source marketing file is unchanged.
+
+The subsequent requested adjustment uses `object-fit: cover` to fill the hero card edge to edge, cropping the landscape image to the card at desktop widths.

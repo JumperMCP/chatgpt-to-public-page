@@ -289,6 +289,7 @@ export class Publisher extends DurableObject<Env> {
           `<p>Allow <strong>${e(details.clientName)}</strong> to read your projects and publish selected files? The registered client name is self-reported. Continue only if you started this connection in ChatGPT.</p><p>Callback: <code>${e(auth.redirectUri)}</code></p>${form("/authorize", session.csrf, hidden("handle", consent.handle) + `<p>Access: ${e(SCOPES.join(", "))}. Published files become public.</p><button name="decision" value="approve">Allow project access</button> <button name="decision" value="deny">Deny</button>`)}`,
           200,
           consent.headers,
+          auth.redirectUri,
         );
       }
       requireThat(

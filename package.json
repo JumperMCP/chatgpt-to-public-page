@@ -1,6 +1,6 @@
 {
   "name": "chatgpt-to-public-page",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "type": "module",
   "license": "MIT",
@@ -13,7 +13,8 @@
     "format": "prettier --write src tests scripts",
     "format:check": "prettier --check src tests scripts",
     "build:installer": "wrangler deploy --config wrangler.installer.jsonc --dry-run --outdir dist/installer",
-    "recovery-token": "node --import tsx scripts/recovery-token.ts"
+    "recovery-token": "node --import tsx scripts/recovery-token.ts",
+    "test:browser": "node --import tsx --test tests/browser/*.test.ts"
   },
   "dependencies": {
     "@cloudflare/workers-oauth-provider": "1.2.1",
@@ -25,6 +26,7 @@
     "@cloudflare/workers-types": "5.20261005.1",
     "@types/node": "26.6.4",
     "miniflare": "5.20261001.0-alpha",
+    "playwright": "1.63.0",
     "prettier": "3.9.9",
     "tsx": "4.23.15",
     "typescript": "7.0.2",

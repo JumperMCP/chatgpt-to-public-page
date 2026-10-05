@@ -1,5 +1,7 @@
-# 0.1.0 — pre-release implementation
+# 0.1.1 — browser form compatibility
 
-Introduces the owner Publisher Worker, SQLite project snapshots, static artifact validation, MCP editing/export/undo tools, resumable publication, a separate PKCE installer, and signed owner-approved updates.
+Fixes native browser form submissions by using a same-origin referrer policy. Owner setup, sign-in, and consent retain strict Origin checks without the browser replacing Origin with null. Consent pages permit navigation to the validated callback origin. HTML responses prohibit proxy transformation while retaining no-store and script-blocking CSP.
 
-Public launch remains blocked on the live-account and client experiments in `docs/acceptance.md`. Callback and artifact-host allowlists start empty. Independent refresh handoff is disabled by default, with an explicit owner-entered API-token fallback. No published release, deployment, video, or external compatibility claim accompanies this source-only implementation.
+The installer also permits the Cloudflare OAuth navigation and uses the requested edge-to-edge hero artwork. A Chromium regression test exercises native form submission, external OAuth redirects, and rejection of null or foreign origins.
+
+Schema 1, migration tag v1, and Publisher Durable Object class are unchanged. The previous 0.1.0 archive remains available. Independent-account installation and ChatGPT compatibility experiments are still in progress; callback allowlists remain empty until verified.

@@ -21,11 +21,11 @@ export function installerPage(title: string, body: string, status = 200) {
       status,
       headers: {
         "Content-Type": "text/html; charset=utf-8",
-        "Cache-Control": "no-store",
-        "Referrer-Policy": "no-referrer",
+        "Cache-Control": "no-store, no-transform",
+        "Referrer-Policy": "same-origin",
         "X-Content-Type-Options": "nosniff",
         "Content-Security-Policy":
-          "default-src 'none'; style-src 'self'; img-src 'self'; font-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'",
+          "default-src 'none'; style-src 'self'; img-src 'self'; font-src 'self'; form-action 'self' https://dash.cloudflare.com; frame-ancestors 'none'; base-uri 'none'",
       },
     },
   );
