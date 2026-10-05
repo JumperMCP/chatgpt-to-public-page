@@ -18,7 +18,7 @@ import {
   sha256,
   canonical,
 } from "../types";
-import { escapeHtml as e, form, hidden, page } from "../ui";
+import { installationPage, installationError } from "./ui";
 interface InstallerEnv {
   INSTALLATIONS: DurableObjectNamespace;
   INSTALLER_ORIGIN: string;
@@ -102,9 +102,8 @@ export class Installation extends DurableObject<InstallerEnv> {
       try {
         return await this.route(request);
       } catch (error) {
-        return page(
-          "Installation needs attention",
-          `<p>${e(publicError(error).message)}</p><a href="/">Return to installation</a>`,
+        return installationError(
+          publicError(error).message,
           error instanceof Problem ? error.status : 500,
         );
       }
@@ -296,25 +295,9 @@ export class Installation extends DurableObject<InstallerEnv> {
       "Page not found.",
       404,
     );
-    const content =
-      state.step === "authorize"
-        ? form(
-            "/start",
-            state.csrf,
-            "<p>Install a Publisher in your Cloudflare account. No business account or subscription is required.</p><button>Install on my Cloudflare</button>",
-          )
-        : state.step === "account"
-          ? form(
-              "/account",
-              state.csrf,
-              `<label>Destination account<select name="account">${state.accounts?.map((a) => `<option value="${e(a.id)}">${e(a.name)}</option>`).join("")}</select></label><button>Install Publisher</button>`,
-            )
-          : state.step === "complete"
-            ? `<p>Publisher installed in your account.</p><p><a href="https://${e(state.worker)}.${e(state.subdomain)}.workers.dev/setup?token=${e(state.setup)}">Create your owner password</a></p><p>Then connect ChatGPT using the MCP URL shown in your Publisher.${this.env.REFRESH_HANDOFF_VERIFIED === "true" ? "" : " Independent OAuth refresh is unverified; enter a scoped Cloudflare API token directly in your Publisher before publishing."}</p>`
-            : `<p>Step: ${e(state.step)}. <a href="/">Refresh progress</a>.</p>${state.error ? `<p>${e(state.error)}</p>${form("/resume", state.csrf, "<button>Resume installation</button>")}` : ""}`;
-    return page(
-      "Install ChatGPT-to-Public",
-      `<p>By <a href="https://jumpermcp.dev">Jumper MCP</a></p>${content}<p>Existing websites and future publishing run in your account. Installer credentials expire after one hour and are erased when installation completes.</p>`,
+    return installationPage(
+      state,
+      this.env.REFRESH_HANDOFF_VERIFIED === "true",
     );
   }
   async alarm() {
