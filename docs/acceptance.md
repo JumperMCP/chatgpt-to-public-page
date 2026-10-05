@@ -102,3 +102,7 @@ After connecting the corrected `/mcp` URL, the tester used web Chat to create a 
 ## First publication tool trace inspected — 2026-10-05
 
 The tester supplied `tmp/tool-call-data.json`. It confirms successful authenticated `list_projects`, staging of one inline 8,832-byte HTML file without warnings, publication acceptance, and progression from uploading to activating. Final operation status remains activating with three attempts and a generic Cloudflare error; it is not a terminal failure. Asset upload is confirmed by the transition to activating. The initial combined `publish_project` call has no recorded output, so its outcome cannot be inferred. Raw trace/site content remains local and uncommitted. Actual activation/readiness and the new numeric error diagnostics remain pending.
+
+## Pending publication/update deadlock — 2026-10-05
+
+The tester could not apply an update because an activation retry remained pending. The real Worker route reproduced the exact busy error. Version 0.1.8 removes the redundant admission guard while retaining serialized execution and update priority. Runtime coverage verifies CSRF rejection, retained operation/file data, and publication resumption after both update outcomes. This local evidence does not establish the tester's underlying Cloudflare rejection or successful live activation; the existing installation requires the documented one-time guard repair.

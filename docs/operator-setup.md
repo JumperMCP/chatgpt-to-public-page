@@ -253,3 +253,19 @@ Set `RELEASE_BASE_URL` to `https://chatgpt-to-public.jumpermcp.dev/releases/0.1.
 0.1.7 is signed from clean source `ac57fb815562ee0259260025a39079defad6f2a1`. All 35 automated and two browser tests passed. Publication reconciliation now reads top-level version annotations; Cloudflare errors include only method/path, HTTP status and numeric codes, without response bodies or credentials. The independent tester's activation rejection remains unidentified until the new diagnostics are observed.
 
 For a functioning 0.1.6 updater, set `RELEASE_BASE_URL` to `https://chatgpt-to-public.jumpermcp.dev/releases/0.1.7/`, deploy the configuration, then Check for updates → review 0.1.7 → Update Publisher. No manual code repair is needed. Keep the existing project and inspect its operation after update completion. An operation still activating will reconcile automatically; if it remains unsuccessful, record the exact safe endpoint/status/code error. Do not mistake the intended URL or Cloudflare's placeholder page for an activated site.
+
+## 0.1.8: unblock updates behind a retrying publication
+
+If an existing Publisher rejects an update with “Wait for publishing to finish before updating”, open that Publisher Worker in Cloudflare → Edit code and select the latest editable version. Search for that exact message. Remove only this check immediately inside the `/updates/apply` branch:
+
+```js
+requireThat(
+  !this.publications.pending().length,
+  "busy",
+  "Wait for publishing to finish before updating."
+);
+```
+
+Leave `this.updates.request(...)`, `this.schedule()`, and the preceding authentication/CSRF checks in place. Deploy the edited version and verify it serves all traffic. Set `RELEASE_BASE_URL` to `https://chatgpt-to-public.jumpermcp.dev/releases/0.1.8/` and deploy that configuration on top of the patched version. Leave `RELEASE_VERSION` unchanged: the updater sets it after installing the bundle. Check for updates, review 0.1.8, and apply it.
+
+This is safe between steps because Publisher serializes requests and alarms. Updates take priority; the existing stored publication resumes after the update settles. Do not delete the project or change its operation state. Once the update completes, inspect the existing publication's next result; any remaining Cloudflare failure now includes its method/path, HTTP status, and numeric provider codes. Local runtime coverage confirms operation/file preservation and resumption after both successful and failed updates. Independent-account confirmation remains pending.
