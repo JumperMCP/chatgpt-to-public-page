@@ -29,7 +29,7 @@
     "REQUIRED_SCOPES": "[\"account-settings.read\",\"workers-scripts.write\",\"workers-kv-storage.write\"]",
     "RELEASE_BASE_URL": "https://chatgpt-to-public.jumpermcp.dev/releases/0.1.3/",
     "RELEASE_PUBLIC_KEY": "J8n5q/f3GMMG0dX27iwZxYx9K5+QLDbbRl/yQiwy/9M=",
-    "CHATGPT_CALLBACKS": "[]",
+    "CHATGPT_CALLBACKS": "[\"https://chatgpt.com/connector_platform_oauth_redirect\"]",
     "FILE_DOWNLOAD_HOSTS": "[]",
     "REFRESH_HANDOFF_VERIFIED": "false"
   },

@@ -1,6 +1,6 @@
 # Acceptance ledger
 
-The plan remains [PRD/technical-plan.md](../PRD/technical-plan.md). This ledger distinguishes implemented local behavior from external evidence. Live installer hosting and OAuth-start smoke checks are recorded below. The tester confirmed independent-account installation, owner access, and receipt/MCP URL retrieval on 2026-10-05. ChatGPT end-to-end testing is blocked by the tester account’s missing custom-MCP option; publishing and broader novice usability remain unverified.
+The plan remains [PRD/technical-plan.md](../PRD/technical-plan.md). This ledger distinguishes implemented local behavior from external evidence. Live installer hosting and OAuth-start smoke checks are recorded below. The tester confirmed independent-account installation, owner access, and receipt/MCP URL retrieval on 2026-10-05. Enabling ChatGPT developer mode exposed custom MCP creation; connection now fails at dynamic client registration with `invalid_client_metadata`. The installed Publisher has an empty callback allowlist. The tester subsequently confirmed `https://chatgpt.com/connector_platform_oauth_redirect` in the New Plugin dialog. The existing Worker needs this callback configured; actual registration authentication metadata remains to be captured; publishing and broader novice usability remain unverified.
 
 | Area | Local implementation/evidence | Still required |
 | --- | --- | --- |
@@ -24,6 +24,21 @@ Interrupt provisioning after each resource creation and after the Publisher uplo
 Test independent refresh at the installed Publisher; observe token expiry and rotation, lose a refresh response/write, revoke access, and simulate expired credentials after idle use. Keep `REFRESH_HANDOFF_VERIFIED=false` until this passes. If it cannot pass, use the visible API-token fallback. Stop the installer and confirm existing sites and ordinary publishing still work.
 
 ## Experiment 2: actual ChatGPT
+
+2026-10-05: the tester reached custom MCP creation after enabling developer mode.
+The public authorization-server discovery endpoint is reachable and advertises
+S256, issuer identification, and DCR. A diagnostic registration using OpenAI's
+documented stable callback and `token_endpoint_auth_method: none` reproduced the
+reported HTTP 400. This diagnostic is not a capture of ChatGPT's actual request.
+The local policy rejects an empty allowlist and accepts that same metadata with
+the exact callback configured. Discovery also advertises secret authentication
+methods, while our registration policy accepts only `none`; inspect ChatGPT's
+actual method before attributing the failure exclusively to callback selection.
+The tester subsequently observed `https://chatgpt.com/connector_platform_oauth_redirect`
+in the New Plugin dialog. Both source deployment configurations now allow that
+exact callback. This verifies the displayed callback only, not successful
+registration, consent, or token exchange. The tester must update the existing
+Worker variable separately; no tester configuration was changed by our diagnostic.
 
 On an eligible account, record the current custom-MCP creation interface and exact callback/registration behavior. Configure only those callbacks. Exercise every tool while authenticated and confirm calls fail without authorization or with an invalid audience/scope. Observe authorized file download hosts without copying signed URLs into logs. Configure only those hosts.
 
