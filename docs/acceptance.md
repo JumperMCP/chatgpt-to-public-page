@@ -12,7 +12,7 @@ The plan remains [PRD/technical-plan.md](../PRD/technical-plan.md). This ledger 
 | Installer | Browser PKCE, account selection, durable progress/retry, grant expiry/erasure, signed release, token fallback | Live grant/provisioning with configured scopes, independent account, permission denial and partial-install recovery (operator supplied successful OAuth client scope update and domain/public-visibility evidence on 2026-10-05) |
 | Cloudflare refresh | Encrypted credentials, serialized refresh, durable replacement, interrupted-rotation reconnect tests | Handoff on public client, expiry/rotation/idle/revocation observations; no lifetime assumptions |
 | Updates | Signed manifest/checksums, compatibility checks, owner review, durable self-update/reconciliation, secret/binding preservation metadata | Actual self-upload preserving encryption key, DO data/class/tag, failed-update and known-good recovery |
-| Distribution | MIT, pinned dependencies/lockfile, CI; signed 0.1.1 hosted on installer domain, HTTPS downloads and signature verified | Independently distributed key, issued build provenance |
+| Distribution | MIT, pinned dependencies/lockfile, CI; signed 0.1.2 hosted on installer domain, HTTPS downloads and signature verified | Independently distributed key, issued build provenance |
 | Documentation/media | Current scope, setup/recovery/uninstall, source-linked architecture, comparisons | Real screenshots, README GIF, captioned video, recorded novice test |
 
 ## Experiment 1: Cloudflare ownership

@@ -1,0 +1,20 @@
+{
+  "manifest": {
+    "version": "0.1.2",
+    "commit": "9ae1cd260427734b09b7dbf3183da8e4ed19841d",
+    "schema": 1,
+    "migration_tag": "v1",
+    "durable_object_class": "Publisher",
+    "compatibility_date": "2026-09-01",
+    "modules": [
+      {
+        "name": "worker.js",
+        "sha256": "0352436eeb132ad13728db4e7b14811c23284c3c60cb3fdc38a74fbc9b9c7eec",
+        "size": 1797657,
+        "type": "application/javascript+module"
+      }
+    ],
+    "notes": "# 0.1.2 — Workers-compatible release downloads\n\nFixes release downloads in Cloudflare Workers by using manual redirect handling and rejecting non-success responses. Workers does not implement redirect mode `error`; previously its exception was mislabeled as invalid release metadata. Download and JSON parse failures now have separate actionable messages. Signatures and checksums remain mandatory.\n\nThe installer uses its direct static-assets binding for hosted releases, supports restarting expired sessions, and keeps progress responsive with automatic refresh. Technical expiry timestamps are no longer shown to users.\n\nSchema 1, migration tag v1, and the Publisher class are unchanged. Previous releases remain archived. Independent-account installation and ChatGPT compatibility testing are still in progress.\n"
+  },
+  "signature": "49M+hJhvdbnF0k1gj/a6tANqOMCu0ssV0zfH8Rq2/GjNx5oVOC2NMhGKc8uzOImaQbYKiB8+Uomvnud1bPFdAA=="
+}

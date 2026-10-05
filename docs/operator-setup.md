@@ -175,3 +175,7 @@ empty pending the separate client experiment.
 ### Browser form patch: 0.1.1
 
 The installer now selects `/releases/0.1.1/`, signed from source `1d426a284e4a7bf9444065662eb1e060604e9e64`. This patch fixes native form Origin suppression and OAuth redirect CSP handling for both installation and owner setup/consent. Version 0.1.0 remains archived. Built from a clean checkout with locked dependencies; type, format, 26 automated tests, and the native Chromium form regression passed before signing. This is a locally signed release; GitHub provenance remains pending.
+
+### Workers release-download patch: 0.1.2
+
+Current installer release: `/releases/0.1.2/`, signed from clean source `9ae1cd260427734b09b7dbf3183da8e4ed19841d`. Workers rejects `redirect: "error"`; release downloads now use manual redirects and reject non-success responses. Hosted installer releases use the ASSETS binding with signature/checksum verification. All 33 tests and the browser form regression passed before signing. Previous archives are unchanged; GitHub build provenance remains pending.
