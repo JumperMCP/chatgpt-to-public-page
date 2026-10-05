@@ -138,13 +138,14 @@ test("progress remains readable while the preflight API call is pending", async 
     );
     const html = await progress.text();
     assert.match(html, /Checking your account/);
-    assert.match(html, /http-equiv="refresh"/);
+    assert.match(html, /src="\/design\/progress.js"/);
+    assert.doesNotMatch(html, /http-equiv="refresh"/);
     release();
     await alarm;
     const failed = await (await call()).text();
     assert.match(failed, /HTTP 403; error 10000/);
     assert.match(failed, /Resume installation/);
-    assert.doesNotMatch(failed, /http-equiv="refresh"/);
+    assert.doesNotMatch(failed, /src="\/design\/progress.js"/);
   } finally {
     release();
     await alarm;

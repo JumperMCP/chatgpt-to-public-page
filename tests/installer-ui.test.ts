@@ -53,7 +53,9 @@ test("installer presentation preserves forms and escapes provider-controlled con
     complete,
     /https:\/\/publisher.owner.workers.dev\/setup\?token=one-use/,
   );
-  assert.match(complete, /enter a scoped Cloudflare API token directly/);
+  assert.match(complete, /Installation receipt/);
+  assert.match(complete, /Step-by-step instructions/);
+  assert.doesNotMatch(complete, /refresh is unverified/);
   const error = installationError("<script>bad</script>", 503);
   assert.equal(error.status, 503);
   assert.doesNotMatch(await error.text(), /<script>/);

@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createServer } from "node:http";
 import { once } from "node:events";
+import { readFile } from "node:fs/promises";
 import { chromium } from "playwright";
 import { installationPage } from "../../src/installer/ui";
 import { page, form } from "../../src/ui";
@@ -116,6 +117,67 @@ test("native installer and owner forms preserve Origin and permit OAuth navigati
       });
       assert.equal(r.status(), 403);
     }
+  } finally {
+    await browser.close();
+    server.close();
+    await once(server, "close");
+  }
+});
+
+test("installer progress updates in place without browser redirects", async () => {
+  let pages = 0;
+  const server = createServer(async (req, res) => {
+    if (req.url === "/design/progress.js") {
+      res.writeHead(200, { "Content-Type": "application/javascript" });
+      res.end(await readFile("public/design/progress.js"));
+      return;
+    }
+    if (req.url !== "/") {
+      res.writeHead(404);
+      res.end();
+      return;
+    }
+    const response = installationPage(
+      ++pages === 1
+        ? { step: "preflight", csrf: "test" }
+        : {
+            step: "complete",
+            csrf: "test",
+            worker: "publisher-test",
+            subdomain: "owner",
+            setup: "test",
+          },
+      false,
+    );
+    res.writeHead(response.status, Object.fromEntries(response.headers));
+    res.end(await response.text());
+  });
+  server.listen(0, "127.0.0.1");
+  await once(server, "listening");
+  const address = server.address();
+  assert.ok(address && typeof address !== "string");
+  const origin = `http://127.0.0.1:${address.port}`;
+  const browser = await chromium.launch({
+    executablePath: process.env.BROWSER_EXECUTABLE_PATH,
+    args: ["--no-sandbox"],
+  });
+  try {
+    const tab = await browser.newPage();
+    let navigations = 0;
+    tab.on("framenavigated", () => {
+      navigations++;
+    });
+    await tab.goto(origin);
+    await tab
+      .getByRole("link", { name: "Open my Publisher" })
+      .waitFor({ timeout: 10000 });
+    assert.equal(navigations, 1);
+    assert.equal(tab.url(), origin + "/");
+    assert.equal(await tab.locator('meta[http-equiv="refresh"]').count(), 0);
+    assert.equal(
+      await tab.locator('[data-installation-poll="true"]').count(),
+      0,
+    );
   } finally {
     await browser.close();
     server.close();

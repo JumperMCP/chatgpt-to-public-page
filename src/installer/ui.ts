@@ -19,10 +19,10 @@ export function installerPage(
   title: string,
   body: string,
   status = 200,
-  refresh = false,
+  poll = false,
 ) {
   return new Response(
-    `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">${refresh ? '<meta http-equiv="refresh" content="5">' : ""}<meta name="color-scheme" content="light dark"><meta name="description" content="Give your ChatGPT creations a public home in your own Cloudflare account. Install Publisher by Jumper MCP."><title>${e(title)} · Publisher</title><link rel="icon" href="/design/publisher-mark.webp"><link rel="preload" href="/design/outfit-variable.ttf" as="font" type="font/ttf" crossorigin><link rel="stylesheet" href="/design/installer.css"></head><body><a class="skip-link" href="#main">Skip to content</a><div class="site-shell"><header class="site-header"><a class="brand" href="/"><img src="/design/publisher-mark.webp" alt="" width="40" height="40"><span>Publisher<small>by Jumper MCP</small></span></a><nav aria-label="Main navigation"><a href="/#how-it-works">How it works</a><a href="/#before-you-install">Before you install</a><a class="jumper-link" href="https://jumpermcp.dev">Jumper MCP ${arrow}</a></nav></header><main id="main">${body}</main><footer class="site-footer"><a href="https://jumpermcp.dev">A little more internet. By Jumper MCP. ${arrow}</a><span>Your ideas. Your Cloudflare account.</span></footer></div></body></html>`,
+    `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light dark"><meta name="description" content="Give your ChatGPT creations a public home in your own Cloudflare account. Install Publisher by Jumper MCP."><title>${e(title)} · Publisher</title><link rel="icon" href="/design/publisher-mark.webp"><link rel="preload" href="/design/outfit-variable.ttf" as="font" type="font/ttf" crossorigin><link rel="stylesheet" href="/design/installer.css">${poll ? '<script src="/design/progress.js" defer></script>' : ""}</head><body><a class="skip-link" href="#main">Skip to content</a><div class="site-shell"><header class="site-header"><a class="brand" href="/"><img src="/design/publisher-mark.webp" alt="" width="40" height="40"><span>Publisher<small>by Jumper MCP</small></span></a><nav aria-label="Main navigation"><a href="/#how-it-works">How it works</a><a href="/#before-you-install">Before you install</a><a class="jumper-link" href="https://jumpermcp.dev">Jumper MCP ${arrow}</a></nav></header><main id="main">${body}</main><footer class="site-footer"><a href="https://jumpermcp.dev">A little more internet. By Jumper MCP. ${arrow}</a><span>Your ideas. Your Cloudflare account.</span></footer></div></body></html>`,
     {
       status,
       headers: {
@@ -30,8 +30,7 @@ export function installerPage(
         "Cache-Control": "no-store, no-transform",
         "Referrer-Policy": "same-origin",
         "X-Content-Type-Options": "nosniff",
-        "Content-Security-Policy":
-          "default-src 'none'; style-src 'self'; img-src 'self'; font-src 'self'; form-action 'self' https://dash.cloudflare.com; frame-ancestors 'none'; base-uri 'none'",
+        "Content-Security-Policy": `default-src 'none'; ${poll ? "script-src 'self'; connect-src 'self'; " : ""}style-src 'self'; img-src 'self'; font-src 'self'; form-action 'self' https://dash.cloudflare.com; frame-ancestors 'none'; base-uri 'none'`,
       },
     },
   );
@@ -75,7 +74,8 @@ export function installationPage(
     state.csrf,
     `<button class="button primary install-button" type="submit">Install on my Cloudflare ${arrow}</button>`,
   );
-  let context = "No business account or subscription is required.";
+  let context =
+    "Install in your own Cloudflare account. ChatGPT must support custom MCP servers.";
   if (state.step === "account") {
     title = "Your account.<br><span>Your Publisher.</span>";
     subtitle =
@@ -88,11 +88,10 @@ export function installationPage(
     context =
       "Publisher will be installed in the Cloudflare account you select.";
   } else if (state.step === "complete") {
-    title = "Your Publisher.<br><span>Ready for you.</span>";
-    subtitle =
-      "Publisher installed in your account. Create your owner password to make it yours.";
-    action = `<a class="button primary" href="https://${e(state.worker)}.${e(state.subdomain)}.workers.dev/setup?token=${e(state.setup)}">Create your owner password ${arrow}</a>`;
-    context = `Then connect ChatGPT using the MCP URL shown in your Publisher.${refreshVerified ? "" : " Independent OAuth refresh is unverified; enter a scoped Cloudflare API token directly in your Publisher before publishing."}`;
+    title = "Installed in<br><span>your Cloudflare.</span>";
+    subtitle = `Your Publisher is running at ${state.worker}.${state.subdomain}.workers.dev in your Cloudflare account. Open it to create the password for your private control panel.`;
+    action = `<a class="button primary" href="https://${e(state.worker)}.${e(state.subdomain)}.workers.dev/setup?token=${e(state.setup)}">Open my Publisher ${arrow}</a>`;
+    context = `In your ChatGPT > Plugins, click “Add custom MCP server” and use the MCP URL from your Publisher’s Settings → Cloudflare → Installation receipt.${refreshVerified ? "" : " In your Publisher settings, enter a Cloudflare API token. Step-by-step instructions explain how to create it."}`;
   } else if (state.step !== "authorize") {
     const [heading, detail] = steps[state.step] ?? [
       "Setting things up",
@@ -102,19 +101,19 @@ export function installationPage(
     subtitle = detail;
     action = `<div class="progress-state" role="status"><span>${icon(state.error ? "arrow-back-up" : "cloud-upload")}${state.error ? "Your installation needs attention" : e(heading)}</span></div>${state.error ? `<p class="error-message" role="alert">${e(state.error)}</p>${form("/resume", state.csrf, `<button class="button primary" type="submit">Resume installation ${arrow}</button>`)}` : ""}<a class="text-link" href="/">Refresh progress ${icon("arrow-right")}</a>`;
     context = inProgress
-      ? "This page refreshes every five seconds. You can leave it open while installation continues."
+      ? "Progress updates here automatically. You can leave this page open while installation continues."
       : "Installation is paused. Resolve the issue above, then resume.";
   }
   return installerPage(
     "Install ChatGPT-to-Public",
     `
-    <div class="bento-grid">
+    <div class="bento-grid" data-installation-poll="${inProgress}">
       <section class="tile hero-tile" aria-labelledby="hero-title">
         <div class="eyebrow"><span class="eyebrow-line"></span> A home for what you make</div>
         <h1 id="hero-title">${title}</h1>
         <p class="hero-description">${e(subtitle)}</p>
         <div class="installation-action">${action}</div>
-        <p class="action-context">${e(context)}</p>
+        <p class="action-context" data-progress-notice>${e(context)}</p>
       </section>
       <figure class="tile art-tile">
         <img class="launch-art" src="/design/publisher-technicolor.webp" alt="Glowing chat bubbles flowing into a browser above a connected world" width="1920" height="1080" fetchpriority="high">
@@ -139,13 +138,13 @@ export function installationPage(
     </div>
     <section class="how-section" id="how-it-works" aria-labelledby="how-title">
       <div class="section-intro"><h2 id="how-title">One setup.<br>More room to create.</h2><p>Install your Publisher, then connect it to ChatGPT.</p></div>
-      <ol class="setup-steps"><li><span class="step-symbol">${icon("cloud-upload")}</span><h3>Connect Cloudflare</h3><p>Authorize Publisher and choose your account.</p></li><li><span class="step-symbol">${icon("lock")}</span><h3>Make it yours</h3><p>Create an owner password on your own Publisher.</p></li><li><span class="step-symbol">${icon("arrow-up-right")}</span><h3>Connect ChatGPT</h3><p>Add your Publisher's MCP URL in an eligible ChatGPT account.</p></li></ol>
+      <ol class="setup-steps"><li><span class="step-symbol">${icon("cloud-upload")}</span><h3>Connect Cloudflare</h3><p>Authorize Publisher and choose your account.</p></li><li><span class="step-symbol">${icon("lock")}</span><h3>Make it yours</h3><p>Create an owner password on your own Publisher.</p></li><li><span class="step-symbol">${icon("arrow-up-right")}</span><h3>Connect ChatGPT</h3><p>In ChatGPT → Plugins, choose Add custom MCP server. Use the MCP URL from your Publisher’s Settings → Cloudflare → Installation receipt.</p></li></ol>
     </section>
     <section class="before-section" id="before-you-install" aria-labelledby="before-title">
       <div class="before-intro"><span class="preview-label">Testing preview</span><h2 id="before-title">A few things<br>before you jump in.</h2><p>This first release is being tested. Cloudflare installation and ChatGPT connection are separate steps.</p></div>
       <div class="questions">
         <details open><summary>What do I need? <span aria-hidden="true">+</span></summary><p>A Cloudflare account and, for the ChatGPT connection, access to custom MCP servers. A free ChatGPT account may not offer that option.</p></details>
-        <details><summary>How does publishing connect? <span aria-hidden="true">+</span></summary><p>${refreshVerified ? "Cloudflare authorization connects your Publisher to your account. You may need to reconnect if access expires or is revoked." : "For this preview, create a scoped Cloudflare API token and enter it directly into your own Publisher before publishing. The installer will guide you after setup."}</p></details>
+        <details><summary>How does publishing connect? <span aria-hidden="true">+</span></summary><p>${refreshVerified ? "Cloudflare authorization connects your Publisher to your account. You may need to reconnect if access expires or is revoked." : "The Cloudflare approval above installs Publisher. To let your Publisher create and update websites afterward, add a Cloudflare API token in its settings. A guided checklist explains how to create the token for your account; it is encrypted and stored inside your Publisher."}</p></details>
         <details><summary>What stays with Jumper MCP? <span aria-hidden="true">+</span></summary><p>Installer credentials expire after one hour and are erased when installation completes. Your sites and future publishing run in your account.</p></details>
       </div>
     </section>`,

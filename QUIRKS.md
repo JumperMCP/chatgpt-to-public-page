@@ -119,3 +119,9 @@ Independent installation stopped at “Release metadata is invalid.” The publi
 Release downloads and credential handoff now use `redirect: "manual"` and reject every non-2xx response, preserving the no-redirect requirement. Transport failures and malformed metadata have separate errors. Hosted installer releases use the ASSETS binding directly; signature/checksum validation still rejects modified bundles. Tests cover successful verification inside workerd, corrupted modules, transport errors, malformed JSON, and redirect rejection.
 
 Removed the visible UTC authorization deadline. Expiry remains enforced server-side, and the expiry page explains the action to take in plain language.
+
+## Firefox blocked meta-refresh during installation
+
+The tester had to allow approximately five automatic redirects before reaching owner setup. Removed meta-refresh. A same-origin script now reads progress and replaces the main content in place, stops on completion/errors, and offers manual refresh after repeated network failures. A real Chromium regression verifies the complete transition with only the initial navigation; Firefox’s reported redirect mechanism is no longer used.
+
+The independent tester reached owner setup and obtained the installation receipt/MCP URL. Their ChatGPT subscription does not expose custom MCP creation. An eligible ChatGPT account can connect to that independent Cloudflare installation; the exact callback allowlist remains to be verified. See https://developers.openai.com/plugins/deploy/connect-chatgpt .

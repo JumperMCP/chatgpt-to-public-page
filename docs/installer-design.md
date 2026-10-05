@@ -45,3 +45,9 @@ The matching dark-mode image was generated with the same model and seed against 
 The hero card now displays the user-supplied `marketing/linkedin-article-image/images/10-retro-krea2-technicolor.png`, optimized into a 1600px WebP (about 90 KB). All captions and previous sculpture imagery are removed from that card. The full landscape composition is preserved against a navy ground; on mobile the card follows the image's 16:9 ratio. Navy and teal-blue page colors echo the artwork, and the initial installation CTA is a jade-green pill with accessible light/dark variants. The source marketing file is unchanged.
 
 The subsequent requested adjustment uses `object-fit: cover` to fill the hero card edge to edge, cropping the landscape image to the card at desktop widths.
+
+## Ownership and setup copy
+
+Completion explicitly hands off to the Publisher’s own workers.dev address. Setup and owner settings have a distinct green private-control-panel design, with the hosting address visible and plain-language password/token guidance. The token instructions explain the difference between temporary installation authorization and ongoing publishing access. The MCP URL is a selectable field under Settings → Cloudflare → Installation receipt. ChatGPT instructions use Plugins → Add custom MCP server, with a Developer mode/account-availability explanation.
+
+Progress updates now fetch the same-origin page and replace the main content in place, avoiding the meta-refresh navigation Firefox blocked during the tester’s installation. Script/connect CSP permissions are enabled only for progress pages, the external analytics beacon remains blocked, and manual refresh remains available. Browser tests confirm completion without extra navigation; owner setup/settings passed 12 viewport/theme checks.

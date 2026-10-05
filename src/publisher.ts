@@ -1,3 +1,4 @@
+import { ownerSetup, cloudflareSettings } from "./owner-ui";
 import { Updates } from "./updates";
 import { refreshCloudflare } from "./cloudflare-oauth";
 import { DurableObject } from "cloudflare:workers";
@@ -223,9 +224,13 @@ export class Publisher extends DurableObject<Env> {
     if ((path === "/setup" || path === "/recover") && request.method === "GET")
       return page(
         path === "/setup"
-          ? "Set up your owner account"
-          : "Recover your owner account",
-        `<p>The installer or your Cloudflare dashboard provides a single-use token. This page cannot be claimed without it.</p><form method="post">${hidden("token", url.searchParams.get("token") ?? "")}<label>New owner password (at least 12 characters)<input type="password" name="password" minlength="12" maxlength="256" autocomplete="new-password" required></label><button>Save password</button></form>`,
+          ? "Your Publisher. Your password."
+          : "Reset your Publisher password",
+        ownerSetup(
+          this.env.PUBLISHER_ORIGIN,
+          url.searchParams.get("token") ?? "",
+          path === "/recover",
+        ),
       );
     if (
       (path === "/setup" || path === "/recover") &&
@@ -362,7 +367,7 @@ export class Publisher extends DurableObject<Env> {
         requireThat(
           token.length >= 20 && token.length <= 2048,
           "invalid_token",
-          "Enter a scoped Cloudflare API token.",
+          "Paste the API token you created using the instructions in Settings → Cloudflare.",
         );
         // Read-only validation happens before storing the replacement credential.
         const response = await fetch(
@@ -412,7 +417,7 @@ export class Publisher extends DurableObject<Env> {
     if (path === "/" && request.method === "GET") {
       const update = this.updates.current();
       const projects = this.projects.list("", 50),
-        health = this.store.get("credential-health") ?? {
+        health = this.store.get<{ state: string }>("credential-health") ?? {
           state: "not_connected",
         },
         operations = this.store
@@ -422,7 +427,7 @@ export class Publisher extends DurableObject<Env> {
           .slice(0, 10);
       return page(
         "Your public projects",
-        `<p>Personal pages and smallish projects that need immediate visibility.</p><p>Publisher ${e(this.env.RELEASE_VERSION)} · Retained content: ${(projects.retained_bytes / 1024 / 1024).toFixed(2)} MiB of 250 MiB.</p><p>MCP connection URL: <code>${e(this.env.PUBLISHER_ORIGIN)}/mcp</code></p><p>Cloudflare credential: <code>${e(JSON.stringify(health))}</code></p>${projects.projects.map((p) => `<section><h2>${e(p.name)}</h2><p><a href="${e(p.url)}" rel="noreferrer">${e(p.url)}</a> · ${p.live ? "Published" : "Private / unpublished"}</p><small>Project ID: ${e(p.id)}</small>${p.head ? form("/export", session.csrf, hidden("project", p.id) + "<button>Export files</button>") : ""}${form("/unpublish", session.csrf, hidden("project", p.id) + hidden("base", p.head) + "<button>Unpublish</button>")}${form("/delete", session.csrf, hidden("project", p.id) + hidden("base", p.head) + `<label>To permanently delete this project and its history, enter <code>${e(p.id)}</code><input name="confirmation" required></label><button>Delete project permanently</button>`)}</section>`).join("") || "<p>No projects yet. Connect ChatGPT and publish your reviewed files.</p>"}<section><h2>Recent operations</h2>${operations.map((op) => `<p>${e(op.kind)}: ${e(op.state)}${op.reachable === false ? " · awaiting reachability" : ""}<br><small>${e(op.error?.message ?? "")}</small></p>`).join("") || "<p>No operations yet.</p>"}</section>${form("/credentials", session.csrf, '<h2>Connect Cloudflare</h2><p>Token fallback: use an account-scoped Workers Scripts Edit token. Do not paste it into ChatGPT or Jumper MCP. Write permission is checked when Cloudflare accepts deployment.</p><label>API token<input type="password" name="token" autocomplete="off" required></label><button>Save encrypted token</button>')}<section><h2>Installation receipt</h2><pre>${e(JSON.stringify({ installation: this.env.INSTALLATION_ID, account: this.env.ACCOUNT_ID, publisher: this.env.PUBLISHER_ORIGIN, version: this.env.RELEASE_VERSION, durable_object: this.ctx.id.toString(), oauth_kv: this.env.OAUTH_KV_ID ?? "See Cloudflare bindings", sites: this.store.list("remote:").map(([, v]) => v) }, null, 2))}</pre><h2>Publisher updates</h2><p>Update state: ${e(update?.state ?? "No update checked")}. ${e(update?.error?.message ?? "")}</p>${form("/updates/check", session.csrf, "<button>Check for updates</button>")}${update?.state === "review" ? `<h3>Review ${e(update.release.manifest.version)}</h3><pre>${e(update.release.manifest.notes)}</pre>${form("/updates/apply", session.csrf, hidden("update", update.id) + "<button>Update Publisher</button>")}` : ""}</section>${form("/logout", session.csrf, "<button>Sign out</button>")}`,
+        `<p>Personal pages and smallish projects that need immediate visibility.</p><p>Publisher ${e(this.env.RELEASE_VERSION)} · Retained content: ${(projects.retained_bytes / 1024 / 1024).toFixed(2)} MiB of 250 MiB.</p><div class="identity"><span>Running in your Cloudflare account</span><strong>${e(new URL(this.env.PUBLISHER_ORIGIN).hostname)}</strong></div><section><h2>Connect ChatGPT</h2><p>In ChatGPT → Plugins, click “Add custom MCP server”. Use the MCP URL from <a href="#installation-receipt">Settings → Cloudflare → Installation receipt</a> below.</p><p>Website publishing: <strong>${e(health.state === "connected" ? "Connected to Cloudflare" : "Connect Cloudflare in Settings below")}</strong></p></section>${projects.projects.map((p) => `<section><h2>${e(p.name)}</h2><p><a href="${e(p.url)}" rel="noreferrer">${e(p.url)}</a> · ${p.live ? "Published" : "Private / unpublished"}</p><small>Project ID: ${e(p.id)}</small>${p.head ? form("/export", session.csrf, hidden("project", p.id) + "<button>Export files</button>") : ""}${form("/unpublish", session.csrf, hidden("project", p.id) + hidden("base", p.head) + "<button>Unpublish</button>")}${form("/delete", session.csrf, hidden("project", p.id) + hidden("base", p.head) + `<label>To permanently delete this project and its history, enter <code>${e(p.id)}</code><input name="confirmation" required></label><button>Delete project permanently</button>`)}</section>`).join("") || "<p>No projects yet. Connect ChatGPT and publish your reviewed files.</p>"}<section><h2>Recent operations</h2>${operations.map((op) => `<p>${e(op.kind)}: ${e(op.state)}${op.reachable === false ? " · awaiting reachability" : ""}<br><small>${e(op.error?.message ?? "")}</small></p>`).join("") || "<p>No operations yet.</p>"}</section>${cloudflareSettings(this.env.PUBLISHER_ORIGIN, this.env.ACCOUNT_ID, session.csrf, { installation: this.env.INSTALLATION_ID, account: this.env.ACCOUNT_ID, publisher: this.env.PUBLISHER_ORIGIN, mcp: this.env.PUBLISHER_ORIGIN + "/mcp", version: this.env.RELEASE_VERSION, durable_object: this.ctx.id.toString(), oauth_kv: this.env.OAUTH_KV_ID ?? "See Cloudflare bindings", sites: this.store.list("remote:").map(([, v]) => v) })}<section><h2>Publisher updates</h2><p>Update state: ${e(update?.state ?? "No update checked")}. ${e(update?.error?.message ?? "")}</p>${form("/updates/check", session.csrf, "<button>Check for updates</button>")}${update?.state === "review" ? `<h3>Review ${e(update.release.manifest.version)}</h3><pre>${e(update.release.manifest.notes)}</pre>${form("/updates/apply", session.csrf, hidden("update", update.id) + "<button>Update Publisher</button>")}` : ""}</section>${form("/logout", session.csrf, "<button>Sign out</button>")}`,
       );
     }
     throw new Problem("not_found", "Page not found.", 404);

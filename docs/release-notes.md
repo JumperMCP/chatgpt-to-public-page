@@ -1,7 +1,7 @@
-# 0.1.2 — Workers-compatible release downloads
+# 0.1.3 — clearer ownership and connection setup
 
-Fixes release downloads in Cloudflare Workers by using manual redirect handling and rejecting non-success responses. Workers does not implement redirect mode `error`; previously its exception was mislabeled as invalid release metadata. Download and JSON parse failures now have separate actionable messages. Signatures and checksums remain mandatory.
+Adds a distinct private-control-panel design for owner setup and settings. The hosting address, password ownership, reason for a publishing token, token-creation steps, and MCP URL location are explicit. The MCP URL is shown under Settings → Cloudflare → Installation receipt, alongside clearer ChatGPT plugin instructions.
 
-The installer uses its direct static-assets binding for hosted releases, supports restarting expired sessions, and keeps progress responsive with automatic refresh. Technical expiry timestamps are no longer shown to users.
+Installer completion makes the handoff to the user’s Cloudflare-hosted Publisher clear. Progress updates in place instead of using meta-refresh, which Firefox blocked for the tester.
 
-Schema 1, migration tag v1, and the Publisher class are unchanged. Previous releases remain archived. Independent-account installation and ChatGPT compatibility testing are still in progress.
+No storage migration or authentication changes. Existing projects, credentials, and owner passwords remain intact. Independent-account installation and receipt retrieval have been confirmed; ChatGPT testing awaits an account with custom MCP access.

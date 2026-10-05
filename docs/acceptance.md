@@ -1,6 +1,6 @@
 # Acceptance ledger
 
-The plan remains [PRD/technical-plan.md](../PRD/technical-plan.md). This ledger distinguishes implemented local behavior from external evidence. Live installer hosting and OAuth-start smoke checks are recorded below. End-to-end independent-account installation and novice usability remain unverified.
+The plan remains [PRD/technical-plan.md](../PRD/technical-plan.md). This ledger distinguishes implemented local behavior from external evidence. Live installer hosting and OAuth-start smoke checks are recorded below. The tester confirmed independent-account installation, owner access, and receipt/MCP URL retrieval on 2026-10-05. ChatGPT end-to-end testing is blocked by the tester account’s missing custom-MCP option; publishing and broader novice usability remain unverified.
 
 | Area | Local implementation/evidence | Still required |
 | --- | --- | --- |
@@ -9,7 +9,7 @@ The plan remains [PRD/technical-plan.md](../PRD/technical-plan.md). This ledger 
 | Files | ZIP streaming/limits/path/symlink/duplicate checks; exact approved download hosts; file-input schemas | Real approved artifact and generated-image transfer; expired references and user fallback |
 | Project memory | Immutable chunked data, transactions, patches, conflicts, idempotency, search/ranges, retention, undo, export/delete tests | Free-plan quota/capacity measurement |
 | Publication | Provider adapter, durable alarms, version/deployment reconciliation, reachability state; fault-injection tests | Real assets-only direct upload/activation, ownership API contract, no preview URLs, SPA and serving rules |
-| Installer | Browser PKCE, account selection, durable progress/retry, grant expiry/erasure, signed release, token fallback | Live grant/provisioning with configured scopes, independent account, permission denial and partial-install recovery (operator supplied successful OAuth client scope update and domain/public-visibility evidence on 2026-10-05) |
+| Installer | Browser PKCE, account selection, durable progress/retry, grant expiry/erasure, signed release, token fallback | Independent-account install, owner setup and receipt retrieval confirmed by tester on 2026-10-05; still test permission denial, resource-level partial-install recovery and actual publishing |
 | Cloudflare refresh | Encrypted credentials, serialized refresh, durable replacement, interrupted-rotation reconnect tests | Handoff on public client, expiry/rotation/idle/revocation observations; no lifetime assumptions |
 | Updates | Signed manifest/checksums, compatibility checks, owner review, durable self-update/reconciliation, secret/binding preservation metadata | Actual self-upload preserving encryption key, DO data/class/tag, failed-update and known-good recovery |
 | Distribution | MIT, pinned dependencies/lockfile, CI; signed 0.1.2 hosted on installer domain, HTTPS downloads and signature verified | Independently distributed key, issued build provenance |
