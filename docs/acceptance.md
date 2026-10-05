@@ -98,3 +98,7 @@ The tester confirmed that connection succeeded with the correct `/mcp` URL and i
 ## First chat publication attempt — 2026-10-05
 
 After connecting the corrected `/mcp` URL, the tester used web Chat to create a site. ChatGPT reported an activation failure and the expected URL served Cloudflare's placeholder. This is user-reported tool-driven staging/publication activity, not a confirmed live site. Operator API probes for empty deployments and empty assets-only activation succeeded and were cleaned up. Version 0.1.7 fixes the remaining publication annotation lookup and exposes safe Cloudflare status/codes; the tester's rejection still needs those details. Preserve and inspect the existing project/operation rather than recreate it.
+
+## First publication tool trace inspected — 2026-10-05
+
+The tester supplied `tmp/tool-call-data.json`. It confirms successful authenticated `list_projects`, staging of one inline 8,832-byte HTML file without warnings, publication acceptance, and progression from uploading to activating. Final operation status remains activating with three attempts and a generic Cloudflare error; it is not a terminal failure. Asset upload is confirmed by the transition to activating. The initial combined `publish_project` call has no recorded output, so its outcome cannot be inferred. Raw trace/site content remains local and uncommitted. Actual activation/readiness and the new numeric error diagnostics remain pending.
