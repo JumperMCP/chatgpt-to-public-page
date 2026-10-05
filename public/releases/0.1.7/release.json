@@ -1,0 +1,20 @@
+{
+  "manifest": {
+    "version": "0.1.7",
+    "commit": "ac57fb815562ee0259260025a39079defad6f2a1",
+    "schema": 1,
+    "migration_tag": "v1",
+    "durable_object_class": "Publisher",
+    "compatibility_date": "2026-09-01",
+    "modules": [
+      {
+        "name": "worker.js",
+        "sha256": "e4c58a30271a77efc4cccc3bfd8282afdb162da192c5eb69a26439ce6b320461",
+        "size": 1806528,
+        "type": "application/javascript+module"
+      }
+    ],
+    "notes": "# 0.1.7 — publication reconciliation and actionable Cloudflare errors\n\nPublication reconciliation now reads top-level Worker version annotations, matching Cloudflare's actual API shape. Previously the adapter could not identify an activated asset deployment as its own operation. The updater's corresponding correction was already included in 0.1.6.\n\nCloudflare failures now include the request method/path, HTTP status, and numeric provider error codes. Provider message bodies, tokens, and query strings are not exposed. Tests cover activation with the actual annotation shape and redaction of provider details.\n\nThe independent tester reported a failed first website activation. Operator-account probes for a new Worker's empty deployment list and an empty assets-only activation both succeeded; temporary Workers were removed. These probes do not establish the tester's actual rejection. Use the improved error details to diagnose the existing publication rather than creating another project. No migration or credential changes.\n"
+  },
+  "signature": "29usDxgcaQuyoZhTzHsih42AGHYdxE7a6RSZta8V2QJxdV4BXDVjoMozwFmxetsDndhWiLnWLX9Qo58RUD/dAQ=="
+}

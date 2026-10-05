@@ -247,3 +247,9 @@ Keep the native-fetch wrapper and deploy. The original migration equality check 
 Set `RELEASE_BASE_URL` to `https://chatgpt-to-public.jumpermcp.dev/releases/0.1.6/`, save/deploy, then Check for updates → review **0.1.6** → Update Publisher. The new version also fixes completion reconciliation. Confirm **Publisher 0.1.6** and **Update state: complete** before retrying ChatGPT. If compatibility still fails, retain the error and stop; do not invent a tag.
 
 0.1.6 is signed from clean source `53f94836abbeac3877587edc2b0c06b124de3c6d`; 34 automated and two browser tests passed. Older archives are unchanged. Independent update/consent and GitHub build provenance remain pending.
+
+### Publication diagnostics and reconciliation: 0.1.7
+
+0.1.7 is signed from clean source `ac57fb815562ee0259260025a39079defad6f2a1`. All 35 automated and two browser tests passed. Publication reconciliation now reads top-level version annotations; Cloudflare errors include only method/path, HTTP status and numeric codes, without response bodies or credentials. The independent tester's activation rejection remains unidentified until the new diagnostics are observed.
+
+For a functioning 0.1.6 updater, set `RELEASE_BASE_URL` to `https://chatgpt-to-public.jumpermcp.dev/releases/0.1.7/`, deploy the configuration, then Check for updates → review 0.1.7 → Update Publisher. No manual code repair is needed. Keep the existing project and inspect its operation after update completion. An operation still activating will reconcile automatically; if it remains unsuccessful, record the exact safe endpoint/status/code error. Do not mistake the intended URL or Cloudflare's placeholder page for an activated site.
