@@ -98,16 +98,36 @@ export class Installation extends DurableObject<InstallerEnv> {
     return next;
   }
   async fetch(request: Request) {
+    // Status reads must not queue behind provisioning network requests.
+    if (request.method === "GET" && new URL(request.url).pathname === "/") {
+      const state = await this.ctx.storage.get<Install>("install");
+      if (state && (state.step !== "account" || state.accounts))
+        return this.render(state);
+    }
     return this.exclusive(async () => {
       try {
         return await this.route(request);
       } catch (error) {
+        const state = await this.ctx.storage.get<Install>("install");
         return installationError(
           publicError(error).message,
           error instanceof Problem ? error.status : 500,
+          state?.csrf,
         );
       }
     });
+  }
+  private render(state: Install) {
+    if (state.expires <= Date.now() || state.step === "expired")
+      return installationError(
+        `This installation session expired at ${new Date(state.expires).toUTCString()}. Start a new installation to authorize Cloudflare again.`,
+        410,
+        state.csrf,
+      );
+    return installationPage(
+      state,
+      this.env.REFRESH_HANDOFF_VERIFIED === "true",
+    );
   }
   private async state() {
     let state = await this.ctx.storage.get<Install>("install");
@@ -162,11 +182,22 @@ export class Installation extends DurableObject<InstallerEnv> {
         signal: AbortSignal.timeout(30000),
       },
     );
-    const data = (await response.json()) as { success: boolean; result: T };
+    const data = (await response.json()) as {
+      success: boolean;
+      result: T;
+      errors?: { code?: unknown }[];
+    };
+    const codes = Array.isArray(data.errors)
+      ? data.errors
+          .map((error) => error.code)
+          .filter((code) => Number.isInteger(code))
+          .slice(0, 5)
+          .join(", ")
+      : "";
     requireThat(
       response.ok && data.success,
       "provisioning",
-      "Cloudflare could not complete this step. Check required permissions, account verification, account limits and workers.dev activation.",
+      `Cloudflare could not complete the ${state.step} step (HTTP ${response.status}${codes ? "; error " + codes : ""}). Check required permissions, account verification, account limits and workers.dev activation, then resume.`,
       503,
     );
     return data.result;
@@ -174,10 +205,27 @@ export class Installation extends DurableObject<InstallerEnv> {
   private async route(request: Request) {
     const url = new URL(request.url),
       state = await this.state();
+    if (url.pathname === "/restart" && request.method === "POST") {
+      exactOrigin(request, this.env.INSTALLER_ORIGIN);
+      const body = new URLSearchParams(
+        decoder.decode(await readBounded(request.body, 4096)),
+      );
+      requireThat(
+        body.get("csrf") === state.csrf,
+        "csrf",
+        "Reload this installation page.",
+        403,
+      );
+      // Erase the abandoned authorization; leave any account resources alone.
+      await this.ctx.storage.delete("install");
+      await this.ctx.storage.deleteAlarm();
+      await this.state();
+      return Response.redirect(this.env.INSTALLER_ORIGIN + "/", 303);
+    }
     requireThat(
       state.expires > Date.now(),
       "expired",
-      "This installation session expired. Clear the installation cookie and start again.",
+      "This installation session expired. Start a new installation to authorize Cloudflare again.",
       410,
     );
     if (url.pathname === "/callback" && request.method === "GET") {
@@ -201,6 +249,11 @@ export class Installation extends DurableObject<InstallerEnv> {
         required,
       );
       state.credential = await encrypt(credential, this.env.INSTALLER_KEY);
+      state.expires = Math.min(
+        Date.now() + 3600000,
+        credential.expires_at ?? Infinity,
+      );
+      await this.ctx.storage.setAlarm(state.expires);
       state.verifier = "";
       state.oauthState = "";
       state.step = "account";
@@ -239,6 +292,9 @@ export class Installation extends DurableObject<InstallerEnv> {
           "The operator has not configured the Cloudflare OAuth client yet.",
           503,
         );
+        state.expires = Date.now() + 3600000;
+        await this.ctx.storage.put("install", state);
+        await this.ctx.storage.setAlarm(state.expires);
         const challenge = btoa(
           String.fromCharCode(
             ...new Uint8Array(
@@ -295,10 +351,7 @@ export class Installation extends DurableObject<InstallerEnv> {
       "Page not found.",
       404,
     );
-    return installationPage(
-      state,
-      this.env.REFRESH_HANDOFF_VERIFIED === "true",
-    );
+    return this.render(state);
   }
   async alarm() {
     return this.exclusive(async () => {

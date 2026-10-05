@@ -103,3 +103,11 @@ A real click on the installer failed with “This action must originate from you
 Chromium also applies `form-action` to redirects after POST. The installer permits `https://dash.cloudflare.com`; Publisher consent permits only the origin of the already validated callback. Normal owner forms remain self-only. Null and foreign Origin values remain rejected. `npm run test:browser` exercises these behaviors using actual rendered forms, with the external destinations stubbed; CI installs Chromium. For local system Chrome set `BROWSER_EXECUTABLE_PATH`.
 
 Cloudflare's auto-injected analytics beacon conflicts with the intentional script-blocking CSP and is unrelated to the Origin failure. HTML uses `Cache-Control: no-store, no-transform` to prevent proxy injection while retaining private session handling; see [Cloudflare response body inspection](https://developers.cloudflare.com/rules/configuration-rules/response-body-inspection/).
+
+## Installer expiry and progress (independent-account test)
+
+The tester reached account selection, then saw preflight remain spinning and eventually an expired-session page. That page linked back to itself and required manual cookie deletion. A real Durable Object regression reproduced both the recovery dead end and progress GETs waiting behind an alarm's network call.
+
+The installer now reads existing progress without joining the mutation queue, refreshes active progress every five seconds, stops refreshing on failure, and offers a same-origin/CSRF-protected restart even after expiry. Restart erases the abandoned authorization but does not delete any Cloudflare resources. Authorization establishes a fresh bounded one-hour window (capped by the token expiry); waiting on the initial landing page no longer consumes that authorization window. The deadline is shown in UTC. Cloudflare failures show HTTP status and numeric error codes without exposing provider response bodies or credentials.
+
+The precise timing of the tester's early expiry has not been established from the available evidence; the confirmed errors and recovery paths have regression coverage.

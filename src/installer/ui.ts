@@ -8,15 +8,21 @@ export interface InstallationView {
   subdomain?: string;
   setup?: string;
   error?: string;
+  expires?: number;
 }
 
 const icon = (name: string, className = "") =>
   `<img class="icon ${className}" src="/design/${name}.svg" width="24" height="24" alt="" aria-hidden="true">`;
 const arrow = icon("arrow-up-right");
 
-export function installerPage(title: string, body: string, status = 200) {
+export function installerPage(
+  title: string,
+  body: string,
+  status = 200,
+  refresh = false,
+) {
   return new Response(
-    `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light dark"><meta name="description" content="Give your ChatGPT creations a public home in your own Cloudflare account. Install Publisher by Jumper MCP."><title>${e(title)} · Publisher</title><link rel="icon" href="/design/publisher-mark.webp"><link rel="preload" href="/design/outfit-variable.ttf" as="font" type="font/ttf" crossorigin><link rel="stylesheet" href="/design/installer.css"></head><body><a class="skip-link" href="#main">Skip to content</a><div class="site-shell"><header class="site-header"><a class="brand" href="/"><img src="/design/publisher-mark.webp" alt="" width="40" height="40"><span>Publisher<small>by Jumper MCP</small></span></a><nav aria-label="Main navigation"><a href="/#how-it-works">How it works</a><a href="/#before-you-install">Before you install</a><a class="jumper-link" href="https://jumpermcp.dev">Jumper MCP ${arrow}</a></nav></header><main id="main">${body}</main><footer class="site-footer"><a href="https://jumpermcp.dev">A little more internet. By Jumper MCP. ${arrow}</a><span>Your ideas. Your Cloudflare account.</span></footer></div></body></html>`,
+    `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">${refresh ? '<meta http-equiv="refresh" content="5">' : ""}<meta name="color-scheme" content="light dark"><meta name="description" content="Give your ChatGPT creations a public home in your own Cloudflare account. Install Publisher by Jumper MCP."><title>${e(title)} · Publisher</title><link rel="icon" href="/design/publisher-mark.webp"><link rel="preload" href="/design/outfit-variable.ttf" as="font" type="font/ttf" crossorigin><link rel="stylesheet" href="/design/installer.css"></head><body><a class="skip-link" href="#main">Skip to content</a><div class="site-shell"><header class="site-header"><a class="brand" href="/"><img src="/design/publisher-mark.webp" alt="" width="40" height="40"><span>Publisher<small>by Jumper MCP</small></span></a><nav aria-label="Main navigation"><a href="/#how-it-works">How it works</a><a href="/#before-you-install">Before you install</a><a class="jumper-link" href="https://jumpermcp.dev">Jumper MCP ${arrow}</a></nav></header><main id="main">${body}</main><footer class="site-footer"><a href="https://jumpermcp.dev">A little more internet. By Jumper MCP. ${arrow}</a><span>Your ideas. Your Cloudflare account.</span></footer></div></body></html>`,
     {
       status,
       headers: {
@@ -58,6 +64,9 @@ export function installationPage(
   state: InstallationView,
   refreshVerified: boolean,
 ) {
+  const inProgress =
+    ["preflight", "storage", "publisher", "handoff"].includes(state.step) &&
+    !state.error;
   let title = "Made in chat.<br><span>Shared with the world.</span>";
   let subtitle =
     "Give your ChatGPT creations a home on the web, in your own Cloudflare account.";
@@ -89,10 +98,12 @@ export function installationPage(
       "Setting things up",
       "Your installation is in progress.",
     ];
-    title = `${e(heading)}<span class="progress-orbit" aria-hidden="true"></span>`;
+    title = `${e(heading)}${inProgress ? '<span class="progress-orbit" aria-hidden="true"></span>' : ""}`;
     subtitle = detail;
     action = `<div class="progress-state" role="status"><span>${icon(state.error ? "arrow-back-up" : "cloud-upload")}${state.error ? "Your installation needs attention" : e(heading)}</span></div>${state.error ? `<p class="error-message" role="alert">${e(state.error)}</p>${form("/resume", state.csrf, `<button class="button primary" type="submit">Resume installation ${arrow}</button>`)}` : ""}<a class="text-link" href="/">Refresh progress ${icon("arrow-right")}</a>`;
-    context = "You can return to this page to check your progress.";
+    context = inProgress
+      ? "This page refreshes every five seconds. You can leave it open while installation continues."
+      : "Installation is paused. Resolve the issue above, then resume.";
   }
   return installerPage(
     "Install ChatGPT-to-Public",
@@ -104,6 +115,7 @@ export function installationPage(
         <p class="hero-description">${e(subtitle)}</p>
         <div class="installation-action">${action}</div>
         <p class="action-context">${e(context)}</p>
+        ${state.expires && state.step !== "complete" ? `<p class="action-context">Authorization window ends at <time datetime="${new Date(state.expires).toISOString()}">${e(new Date(state.expires).toUTCString())}</time>.</p>` : ""}
       </section>
       <figure class="tile art-tile">
         <img class="launch-art" src="/design/publisher-technicolor.webp" alt="Glowing chat bubbles flowing into a browser above a connected world" width="1920" height="1080" fetchpriority="high">
@@ -138,13 +150,19 @@ export function installationPage(
         <details><summary>What stays with Jumper MCP? <span aria-hidden="true">+</span></summary><p>Installer credentials expire after one hour and are erased when installation completes. Your sites and future publishing run in your account.</p></details>
       </div>
     </section>`,
+    200,
+    inProgress,
   );
 }
 
-export function installationError(message: string, status: number) {
+export function installationError(
+  message: string,
+  status: number,
+  csrf?: string,
+) {
   return installerPage(
     "Installation needs attention",
-    `<section class="tile error-tile"><span class="step-symbol">${icon("arrow-back-up")}</span><h1>Let's get you<br>back on track.</h1><p role="alert">${e(message)}</p><a class="button primary" href="/">Return to installation ${arrow}</a></section>`,
+    `<section class="tile error-tile"><span class="step-symbol">${icon("arrow-back-up")}</span><h1>Let's get you<br>back on track.</h1><p role="alert">${e(message)}</p><a class="button primary" href="/">Return to installation ${arrow}</a>${csrf ? form("/restart", csrf, `<button class="button primary" type="submit">Start a new installation ${arrow}</button><p class="action-context">This discards the previous installer authorization. Any resources already created in Cloudflare remain in your account.</p>`) : ""}</section>`,
     status,
   );
 }
