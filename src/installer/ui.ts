@@ -64,7 +64,7 @@ export function installationPage(
   let action = form(
     "/start",
     state.csrf,
-    `<button class="button primary" type="submit">Install on my Cloudflare ${arrow}</button>`,
+    `<button class="button primary install-button" type="submit">Install on my Cloudflare ${arrow}</button>`,
   );
   let context = "No business account or subscription is required.";
   if (state.step === "account") {
@@ -106,9 +106,7 @@ export function installationPage(
         <p class="action-context">${e(context)}</p>
       </section>
       <figure class="tile art-tile">
-        <div class="art-caption"><span>Small idea.<br>Whole wide web.</span>${icon("world")}</div>
-        <picture><source media="(prefers-color-scheme: dark)" srcset="/design/publisher-launch-dark.webp"><img class="launch-art" src="/design/publisher-launch.webp" alt="A sculptural blue browser tile lifting out of a pair of chat bubbles" width="1024" height="1024" fetchpriority="high"></picture>
-        <figcaption>Make something worth sharing.</figcaption>
+        <img class="launch-art" src="/design/publisher-technicolor.webp" alt="Glowing chat bubbles flowing into a browser above a connected world" width="1920" height="1080" fetchpriority="high">
       </figure>
       <section class="tile ownership-tile" aria-labelledby="ownership-title">
         <div class="tile-heading">${icon("lock")}<span>Built around ownership</span></div>

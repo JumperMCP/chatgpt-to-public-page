@@ -39,3 +39,7 @@ The matching dark-mode image was generated with the same model and seed against 
 - TypeScript, formatting, installer build, and all 26 automated tests passed. Form tests cover account selection, CSRF, escaped error/account text, retries, completion, and security headers.
 - Chromium checked 48 combinations: 320, 390, 768, and 1440px; light and dark; initial, account selection, progress, retry, complete, and error states. No horizontal overflow or broken images. Native disclosures, form fields, and reduced motion were checked.
 - Local mobile Lighthouse: performance 99, accessibility 100, best practices 100, SEO 92; LCP 2.0s and CLS 0. The preview server's catch-all HTML response for robots.txt accounts for the SEO finding. An additional accessible-name diagnostic on the brand link was resolved by using its native visible text.
+
+## Artwork and palette revision
+
+The hero card now displays the user-supplied `marketing/linkedin-article-image/images/10-retro-krea2-technicolor.png`, optimized into a 1600px WebP (about 90 KB). All captions and previous sculpture imagery are removed from that card. The full landscape composition is preserved against a navy ground; on mobile the card follows the image's 16:9 ratio. Navy and teal-blue page colors echo the artwork, and the initial installation CTA is a jade-green pill with accessible light/dark variants. The source marketing file is unchanged.
