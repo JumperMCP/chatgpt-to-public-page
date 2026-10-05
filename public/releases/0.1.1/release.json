@@ -1,0 +1,20 @@
+{
+  "manifest": {
+    "version": "0.1.1",
+    "commit": "1d426a284e4a7bf9444065662eb1e060604e9e64",
+    "schema": 1,
+    "migration_tag": "v1",
+    "durable_object_class": "Publisher",
+    "compatibility_date": "2026-09-01",
+    "modules": [
+      {
+        "name": "worker.js",
+        "sha256": "900129944f7a662d63fe6475061041a46bca1f9674c1ea8e7dc3d128e8e9b751",
+        "size": 1797302,
+        "type": "application/javascript+module"
+      }
+    ],
+    "notes": "# 0.1.1 — browser form compatibility\n\nFixes native browser form submissions by using a same-origin referrer policy. Owner setup, sign-in, and consent retain strict Origin checks without the browser replacing Origin with null. Consent pages permit navigation to the validated callback origin. HTML responses prohibit proxy transformation while retaining no-store and script-blocking CSP.\n\nThe installer also permits the Cloudflare OAuth navigation and uses the requested edge-to-edge hero artwork. A Chromium regression test exercises native form submission, external OAuth redirects, and rejection of null or foreign origins.\n\nSchema 1, migration tag v1, and Publisher Durable Object class are unchanged. The previous 0.1.0 archive remains available. Independent-account installation and ChatGPT compatibility experiments are still in progress; callback allowlists remain empty until verified.\n"
+  },
+  "signature": "KR7TEIJU8KAaFSdMUgNt9T8i7aieZ2GaUtLkXDCaPYlTNJFcIVcJGjW++LT8CJ6BjoakTq89LDSrOSkxZY0WBQ=="
+}

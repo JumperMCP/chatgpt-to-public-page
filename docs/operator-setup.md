@@ -171,3 +171,7 @@ my Cloudflare**, authorize Publisher, and select the independent account. Record
 errors without sharing authorization codes, cookies, or setup tokens. The API
 token fallback remains enabled; ChatGPT callbacks and file-host allowlists remain
 empty pending the separate client experiment.
+
+### Browser form patch: 0.1.1
+
+The installer now selects `/releases/0.1.1/`, signed from source `1d426a284e4a7bf9444065662eb1e060604e9e64`. This patch fixes native form Origin suppression and OAuth redirect CSP handling for both installation and owner setup/consent. Version 0.1.0 remains archived. Built from a clean checkout with locked dependencies; type, format, 26 automated tests, and the native Chromium form regression passed before signing. This is a locally signed release; GitHub provenance remains pending.
