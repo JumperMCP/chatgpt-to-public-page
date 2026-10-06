@@ -184,7 +184,7 @@ test("Publisher cockpit fits desktop, scrolls long lists, and preserves owner fo
     await tab
       .locator(".project-row")
       .first()
-      .getByText("Manage project", { exact: true })
+      .getByText("Manage", { exact: true })
       .click();
     const deleteDetails = tab
       .locator(".project-row")

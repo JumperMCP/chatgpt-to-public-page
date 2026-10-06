@@ -64,7 +64,7 @@ test("real Worker + SQLite DO: setup, owner UI, sibling isolation, protected MCP
     r = await call("/", { headers: { Cookie: cookie } });
     assert.equal(r.status, 200);
     const html = await r.text();
-    assert.match(html, /Your public projects/);
+    assert.match(html, /Public projects/);
     assert.doesNotMatch(html, /a secure owner password/);
     const csrf = html.match(/name="csrf" value="([^"]+)"/)![1];
     r = await call("/logout", {

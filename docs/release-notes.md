@@ -1,7 +1,5 @@
-# 0.1.11 — quieter cockpit and clearer setup help
+# 0.1.12 — compact project rows
 
-Remove the cockpit header navigation and main heading, place the bold sign-out control beside the hosting footer, clarify Cloudflare settings and installed-version labels, and add a link to the installer. Panel scrollbars are wider and higher contrast, with 10px styling where supported and native-width Firefox scrollbars.
+Shorten the control-panel brand to Publisher and the project heading to Public projects. Each collapsed project is now one row: the project name links to the public site, its status remains visible, and Manage opens the controls below. Long project names truncate visually while retaining their full link text and hover title. The full hostname, project ID, export/unpublish controls, and confirmed deletion remain available when expanded.
 
-Checking the currently installed release keeps its review notes visible without offering Update Publisher. The server also rejects same-version apply requests without queuing an update. Regression coverage checks the review-only behavior, blocked submission, and normal update admission for a different release.
-
-The installer replaces its preview introduction with Frequently Asked Questions, simplifies all answers, and adds practical guidance from independent testing: exact /mcp URL, account/workspace selection, publishing key and owner password, mobile/fresh-chat editing, delayed publication, and renaming. Remove the extra header link, decorative eyebrow dash, and redundant installation line. No migration, credential, or origin changes.
+Native keyboard-accessible details and independent project links are preserved. No migration, credential, or origin changes.
