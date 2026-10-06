@@ -22,7 +22,7 @@ export function installerPage(
   poll = false,
 ) {
   return new Response(
-    `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light dark"><meta name="description" content="Give your ChatGPT creations a public home in your own Cloudflare account. Install Publisher by Jumper MCP."><title>${e(title)} · Publisher</title><link rel="icon" href="/design/publisher-mark.webp"><link rel="preload" href="/design/outfit-variable.ttf" as="font" type="font/ttf" crossorigin><link rel="stylesheet" href="/design/installer.css">${poll ? '<script src="/design/progress.js" defer></script>' : ""}</head><body><a class="skip-link" href="#main">Skip to content</a><div class="site-shell"><header class="site-header"><a class="brand" href="/"><img src="/design/publisher-mark.webp" alt="" width="40" height="40"><span>Publisher<small>by Jumper MCP</small></span></a><nav aria-label="Main navigation"><a href="/#how-it-works">How it works</a><a href="/#before-you-install">Before you install</a><a class="jumper-link" href="https://jumpermcp.dev">Jumper MCP ${arrow}</a></nav></header><main id="main">${body}</main><footer class="site-footer"><a href="https://jumpermcp.dev">A little more internet. By Jumper MCP. ${arrow}</a><span>Your ideas. Your Cloudflare account.</span></footer></div></body></html>`,
+    `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light dark"><meta name="description" content="Give your ChatGPT creations a public home in your own Cloudflare account. Install Publisher by Jumper MCP."><title>${e(title)} · Publisher</title><link rel="icon" href="/design/publisher-mark.webp"><link rel="preload" href="/design/outfit-variable.ttf" as="font" type="font/ttf" crossorigin><link rel="stylesheet" href="/design/installer.css">${poll ? '<script src="/design/progress.js" defer></script>' : ""}</head><body><a class="skip-link" href="#main">Skip to content</a><div class="site-shell"><header class="site-header"><a class="brand" href="/"><img src="/design/publisher-mark.webp" alt="" width="40" height="40"><span>Publisher<small>by Jumper MCP</small></span></a><nav aria-label="Main navigation"><a href="/#how-it-works">How it works</a><a href="/#before-you-install">Before you install</a></nav></header><main id="main">${body}</main><footer class="site-footer"><a href="https://jumpermcp.dev">A little more internet. By Jumper MCP. ${arrow}</a><span>Your ideas. Your Cloudflare account.</span></footer></div></body></html>`,
     {
       status,
       headers: {
@@ -74,8 +74,7 @@ export function installationPage(
     state.csrf,
     `<button class="button primary install-button" type="submit">Install on my Cloudflare ${arrow}</button>`,
   );
-  let context =
-    "Install in your own Cloudflare account. ChatGPT must support custom MCP servers.";
+  let context = "";
   if (state.step === "account") {
     title = "Your account.<br><span>Your Publisher.</span>";
     subtitle =
@@ -91,7 +90,7 @@ export function installationPage(
     title = "Installed in<br><span>your Cloudflare.</span>";
     subtitle = `Your Publisher is running at ${state.worker}.${state.subdomain}.workers.dev in your Cloudflare account. Open it to create the password for your private control panel.`;
     action = `<a class="button primary" href="https://${e(state.worker)}.${e(state.subdomain)}.workers.dev/setup?token=${e(state.setup)}">Open my Publisher ${arrow}</a>`;
-    context = `In your ChatGPT > Plugins, click “Add custom MCP server” and use the MCP URL from your Publisher’s Settings → Cloudflare → Installation receipt.${refreshVerified ? "" : " In your Publisher settings, enter a Cloudflare API token. Step-by-step instructions explain how to create it."}`;
+    context = `In your ChatGPT > Plugins, click “Add custom MCP server” and use the MCP URL from your Publisher’s ChatGPT connection → Installation receipt.${refreshVerified ? "" : " In your Publisher settings, enter a Cloudflare API token. Step-by-step instructions explain how to create it."}`;
   } else if (state.step !== "authorize") {
     const [heading, detail] = steps[state.step] ?? [
       "Setting things up",
@@ -109,11 +108,11 @@ export function installationPage(
     `
     <div class="bento-grid" data-installation-poll="${inProgress}">
       <section class="tile hero-tile" aria-labelledby="hero-title">
-        <div class="eyebrow"><span class="eyebrow-line"></span> A home for what you make</div>
+        <div class="eyebrow">A home for what you make</div>
         <h1 id="hero-title">${title}</h1>
         <p class="hero-description">${e(subtitle)}</p>
         <div class="installation-action">${action}</div>
-        <p class="action-context" data-progress-notice>${e(context)}</p>
+        ${context ? `<p class="action-context" data-progress-notice>${e(context)}</p>` : ""}
       </section>
       <figure class="tile art-tile">
         <img class="launch-art" src="/design/publisher-technicolor.webp" alt="Glowing chat bubbles flowing into a browser above a connected world" width="1920" height="1080" fetchpriority="high">
@@ -138,14 +137,22 @@ export function installationPage(
     </div>
     <section class="how-section" id="how-it-works" aria-labelledby="how-title">
       <div class="section-intro"><h2 id="how-title">One setup.<br>More room to create.</h2><p>Install your Publisher, then connect it to ChatGPT.</p></div>
-      <ol class="setup-steps"><li><span class="step-symbol">${icon("cloud-upload")}</span><h3>Connect Cloudflare</h3><p>Authorize Publisher and choose your account.</p></li><li><span class="step-symbol">${icon("lock")}</span><h3>Make it yours</h3><p>Create an owner password on your own Publisher.</p></li><li><span class="step-symbol">${icon("arrow-up-right")}</span><h3>Connect ChatGPT</h3><p>In ChatGPT → Plugins, choose Add custom MCP server. Use the MCP URL from your Publisher’s Settings → Cloudflare → Installation receipt.</p></li></ol>
+      <ol class="setup-steps"><li><span class="step-symbol">${icon("cloud-upload")}</span><h3>Connect Cloudflare</h3><p>Authorize Publisher and choose your account.</p></li><li><span class="step-symbol">${icon("lock")}</span><h3>Make it yours</h3><p>Create an owner password on your own Publisher.</p></li><li><span class="step-symbol">${icon("arrow-up-right")}</span><h3>Connect ChatGPT</h3><p>In ChatGPT → Plugins, choose Add custom MCP server. Use the MCP URL from your Publisher’s ChatGPT connection → Installation receipt.</p></li></ol>
     </section>
     <section class="before-section" id="before-you-install" aria-labelledby="before-title">
-      <div class="before-intro"><span class="preview-label">Testing preview</span><h2 id="before-title">A few things<br>before you jump in.</h2><p>This first release is being tested. Cloudflare installation and ChatGPT connection are separate steps.</p></div>
+      <div class="before-intro"><h2 id="before-title">Frequently Asked Questions</h2></div>
       <div class="questions">
-        <details open><summary>What do I need? <span aria-hidden="true">+</span></summary><p>A Cloudflare account and, for the ChatGPT connection, access to custom MCP servers. A free ChatGPT account may not offer that option.</p></details>
-        <details><summary>How does publishing connect? <span aria-hidden="true">+</span></summary><p>${refreshVerified ? "Cloudflare authorization connects your Publisher to your account. You may need to reconnect if access expires or is revoked." : "The Cloudflare approval above installs Publisher. To let your Publisher create and update websites afterward, add a Cloudflare API token in its settings. A guided checklist explains how to create the token for your account; it is encrypted and stored inside your Publisher."}</p></details>
-        <details><summary>What stays with Jumper MCP? <span aria-hidden="true">+</span></summary><p>Installer credentials expire after one hour and are erased when installation completes. Your sites and future publishing run in your account.</p></details>
+        <details open><summary>What do I need? <span aria-hidden="true">+</span></summary><p>A Cloudflare account and a ChatGPT account that lets you add a custom MCP server. Our tester completed the workflow with free accounts. Check that the option is available in your ChatGPT account before installing.</p></details>
+        <details><summary>How do I add Publisher to ChatGPT? <span aria-hidden="true">+</span></summary><p>Open Plugins in ChatGPT and look for the option to add a custom MCP server. Copy the full MCP server URL from your Publisher’s installation receipt, including <code>/mcp</code> at the end. The control-panel address alone will not work.</p></details>
+        <details><summary>I cannot find the custom MCP option. What now? <span aria-hidden="true">+</span></summary><p>Check ChatGPT on the web and confirm which account and workspace you are using. Our tester found the option after enabling Developer mode in Settings → Security and login. Menu names and availability can vary. See <a href="https://learn.chatgpt.com/docs/plugins" target="_blank" rel="noreferrer">OpenAI’s plugin guide</a> for current guidance.</p></details>
+        <details><summary>Why do I need a Cloudflare API token after approving installation? <span aria-hidden="true">+</span></summary><p>${refreshVerified ? "Cloudflare approval connects Publisher to your account. If that access expires or is revoked, reconnect in Publisher’s Cloudflare settings." : "Your first approval lets the installer create Publisher. Your Publisher then needs its own publishing key, called an API token, to create and update websites. Open Cloudflare settings in your Publisher and follow the steps there. The key is encrypted and stays in your Cloudflare account; do not paste it into ChatGPT."}</p></details>
+        <details><summary>Which password am I creating? <span aria-hidden="true">+</span></summary><p>A password for your private Publisher control panel, hosted in your Cloudflare account. It is not a new Jumper MCP account. Use this same owner password when connecting Publisher to ChatGPT.</p></details>
+        <details><summary>Can I edit a site from another chat or my phone? <span aria-hidden="true">+</span></summary><p>Yes. Projects are saved in Publisher, not in a single chat. In a new chat with Publisher available, ask it to find your project and make the edit. Our tester also did this successfully from a smartphone.</p></details>
+        <details><summary>Why is Publisher missing on another device or account? <span aria-hidden="true">+</span></summary><p>First check that you are signed into the ChatGPT account and workspace where you connected Publisher. A second account may need its own connection. Seeing a plugin on another account does not by itself confirm that it has access.</p></details>
+        <details><summary>ChatGPT says publishing failed. Should I start over? <span aria-hidden="true">+</span></summary><p>Check Recent operations in your Publisher first. “Uploading” or “activating” can still mean it is working or retrying; retries may take up to five minutes. Refresh the panel before creating another project. If the error continues, copy the error shown there, including any HTTP status or code, when asking for help.</p></details>
+        <details><summary>When is my site ready to share? <span aria-hidden="true">+</span></summary><p>Wait for Publisher to show Published, then open the public link. If it says the address is not reachable yet, or Cloudflare shows “There is nothing here yet,” wait and check again. A proposed URL in ChatGPT is not confirmation that the site is live.</p></details>
+        <details><summary>What stays with Jumper MCP? <span aria-hidden="true">+</span></summary><p>The installer removes its saved Cloudflare authorization when installation completes. Your Publisher, files, publishing key, and websites stay in your Cloudflare account. Future publishing runs there.</p></details>
+        <details><summary>Can I rename Publisher in Cloudflare? <span aria-hidden="true">+</span></summary><p>Changing the Worker name changes its address and can break your ChatGPT connection and updates. Treat it as a move to a new address: the Publisher configuration and ChatGPT connection must be updated together. Changing the account’s workers.dev subdomain can also change your website addresses.</p></details>
       </div>
     </section>`,
     200,

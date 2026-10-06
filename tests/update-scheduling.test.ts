@@ -20,7 +20,7 @@ test("owner update pauses pending publication between steps and resumes it after
         op.state = 'activating'; op.attempts = 3;
         op.error = {code:'cloudflare_error',message:'Retry pending'};
         this.store.put('operation:'+op.id,op);
-        this.store.put('publisher-update',{id:'update',state:'review',from:'0.1.7',created:Date.now()});
+        this.store.put('publisher-update',{id:'update',state:'review',from:'0.1.7',created:Date.now(),release:{manifest:{version:'0.1.8'}}});
         return {token:session.token,csrf:session.csrf,op,revision};
       }
       async apply(token, csrf) {

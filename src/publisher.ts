@@ -477,6 +477,11 @@ export class Publisher extends DurableObject<Env> {
         {},
         undefined,
         true,
+        form(
+          "/logout",
+          session.csrf,
+          "<button><strong>Sign out</strong></button>",
+        ),
       );
     }
     throw new Problem("not_found", "Page not found.", 404);

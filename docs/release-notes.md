@@ -1,7 +1,7 @@
-# 0.1.10 — a compact blue Publisher cockpit
+# 0.1.11 — quieter cockpit and clearer setup help
 
-The owner control panel now shares the installer's navy/teal palette and Outfit typography. Five bento panels keep projects, ChatGPT connection, recent operations, Cloudflare settings, and updates in one desktop viewport. Project and activity lists scroll independently; uncommon and destructive controls use native expandable details. Small screens use a stacked layout. Setup, login, and consent pages share the refreshed visual language.
+Remove the cockpit header navigation and main heading, place the bold sign-out control beside the hosting footer, clarify Cloudflare settings and installed-version labels, and add a link to the installer. Panel scrollbars are wider and higher contrast, with 10px styling where supported and native-width Firefox scrollbars.
 
-The supplied Protected by Cloudflare badge appears in the upper right at one-third of its source width on desktop. Badge and font are embedded in the signed Worker bundle, with no external asset dependency. CSP permits only data images/fonts in addition to the existing inline styles and validated form destinations; scripts remain disabled. Existing actions, CSRF checks, project deletion confirmation, and installation receipt remain available.
+Checking the currently installed release keeps its review notes visible without offering Update Publisher. The server also rejects same-version apply requests without queuing an update. Regression coverage checks the review-only behavior, blocked submission, and normal update admission for a different release.
 
-Browser coverage checks desktop fit at 1440×900, 1366×768, and 1024×768 in both color schemes; mobile overflow, empty/setup states, badge rendering, and project-management form fields/submission. Includes the 0.1.9 retry scheduling fix. No migration, credential, Worker name, or origin changes.
+The installer replaces its preview introduction with Frequently Asked Questions, simplifies all answers, and adds practical guidance from independent testing: exact /mcp URL, account/workspace selection, publishing key and owner password, mobile/fresh-chat editing, delayed publication, and renaming. Remove the extra header link, decorative eyebrow dash, and redundant installation line. No migration, credential, or origin changes.

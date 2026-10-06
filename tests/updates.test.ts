@@ -126,3 +126,43 @@ test("self-update interruption reconciles the activated version without reupload
     token: "still-decrypts",
   });
 });
+
+test("reviewing an installed release retains notes but cannot queue a reinstall", () => {
+  const store = new TestStore();
+  const op: Update = {
+    id: "review",
+    state: "review",
+    from: "0.1.10",
+    created: Date.now(),
+    attempts: 0,
+    release: {
+      signature: "reviewed",
+      manifest: {
+        version: "0.1.10",
+        commit: "a".repeat(40),
+        schema: 1,
+        migration_tag: "v1",
+        durable_object_class: "Publisher",
+        compatibility_date: "2026-09-01",
+        modules: [],
+        notes: "Current release notes",
+      },
+    },
+  };
+  store.put("publisher-update", op);
+  const updates = new Updates(store, { RELEASE_VERSION: "0.1.10" } as Env, {
+    async api<T>(): Promise<T> {
+      throw new Error("No network expected");
+    },
+  });
+  assert.throws(() => updates.request("review"), { code: "already_installed" });
+  assert.equal(updates.current()?.state, "review");
+  assert.equal(
+    updates.current()?.release.manifest.notes,
+    "Current release notes",
+  );
+  op.release.manifest.version = "0.1.11";
+  store.put("publisher-update", op);
+  updates.request("review");
+  assert.equal(updates.current()?.state, "queued");
+});

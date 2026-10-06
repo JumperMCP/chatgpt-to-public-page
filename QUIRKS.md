@@ -199,3 +199,9 @@ A deliberate migration must preserve the Publisher's DO binding/storage, OAuth K
 ### Owner cockpit redesign
 
 Version 0.1.10 applies the installer blue bento theme to the installed Publisher and its setup/login/consent pages. The upper-right Cloudflare badge and explicit account-hosting text make the move from Jumper MCP to the user's own infrastructure more visible. Panels contain their own scrolling, less-used controls are expandable, and mobile uses a natural stacked layout. Native forms and security checks remain. The supplied badge and existing licensed font are embedded, so owner pages do not depend on the installer for design assets.
+
+### Same-version review offered a redundant install
+
+The tester checked for updates while already running the configured 0.1.10 release. Publisher correctly fetched its notes, but also offered Update Publisher for the identical version. Version 0.1.11 retains the notes and reports that the version is already installed, hides the apply button, and rejects same-version apply requests on the server. Tests cover both the blocked reinstall and admission of a different release. The comparison concerns the configured release source, not a claim to discover every release automatically.
+
+The installer FAQ now translates user-relevant findings into setup/recovery guidance without exposing internal migration repairs. Free-account and smartphone success are labeled as tester observations; plugin visibility across accounts is not represented as guaranteed shared authorization. ChatGPT menu wording is qualified and links to https://learn.chatgpt.com/docs/plugins for current guidance.

@@ -7,7 +7,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { chromium } from "playwright";
 import { dashboard } from "../../src/dashboard";
-import { page } from "../../src/ui";
+import { page, form } from "../../src/ui";
 
 test("Publisher cockpit fits desktop, scrolls long lists, and preserves owner forms on mobile", async () => {
   let posted = "";
@@ -64,6 +64,29 @@ test("Publisher cockpit fits desktop, scrolls long lists, and preserves owner fo
       return;
     }
     const empty = req.url === "/empty";
+    const reviewed = req.url === "/current" || req.url === "/available";
+    const input = { ...fixture };
+    if (reviewed)
+      input.update = {
+        id: "review",
+        state: "review",
+        from: fixture.version,
+        created: Date.now(),
+        attempts: 0,
+        release: {
+          signature: "reviewed",
+          manifest: {
+            version: req.url === "/current" ? fixture.version : "0.1.11",
+            commit: "a".repeat(40),
+            schema: 1,
+            migration_tag: "v1",
+            durable_object_class: "Publisher",
+            compatibility_date: "2026-09-01",
+            modules: [],
+            notes: "Release notes remain readable",
+          },
+        },
+      };
     const body = dashboard(
       empty
         ? {
@@ -72,7 +95,7 @@ test("Publisher cockpit fits desktop, scrolls long lists, and preserves owner fo
             projects: { ...fixture.projects, projects: [] },
             operations: [],
           }
-        : fixture,
+        : input,
     );
     const response = page(
       "Publishing, at a glance.",
@@ -81,6 +104,11 @@ test("Publisher cockpit fits desktop, scrolls long lists, and preserves owner fo
       {},
       undefined,
       true,
+      form(
+        "/logout",
+        fixture.csrf,
+        "<button><strong>Sign out</strong></button>",
+      ),
     );
     res.writeHead(response.status, Object.fromEntries(response.headers));
     res.end(await response.text());
@@ -92,6 +120,7 @@ test("Publisher cockpit fits desktop, scrolls long lists, and preserves owner fo
   const browser = await chromium.launch({
     executablePath: process.env.BROWSER_EXECUTABLE_PATH,
     args: ["--no-sandbox"],
+    ignoreDefaultArgs: ["--hide-scrollbars"],
   });
   const tab = await browser.newPage();
   const errors: string[] = [];
@@ -180,6 +209,43 @@ test("Publisher cockpit fits desktop, scrolls long lists, and preserves owner fo
     );
     assert.ok(
       await tab.getByLabel("Cloudflare API token", { exact: true }).isVisible(),
+    );
+    await tab.goto(`http://127.0.0.1:${address.port}/current`);
+    assert.equal(await tab.locator("h1").count(), 0);
+    assert.equal(await tab.locator("header nav").count(), 0);
+    assert.equal(
+      await tab
+        .getByRole("button", { name: "Update Publisher", exact: true })
+        .count(),
+      0,
+    );
+    assert.equal(
+      await tab.getByText("Release notes remain readable").count(),
+      1,
+    );
+    assert.equal(
+      await tab.getByText("You already have this version installed.").count(),
+      1,
+    );
+    assert.equal(
+      await tab
+        .locator("footer")
+        .getByRole("button", { name: "Sign out" })
+        .count(),
+      1,
+    );
+    assert.equal(
+      await tab
+        .getByRole("link", { name: "jumpermcp.dev", exact: true })
+        .getAttribute("href"),
+      "https://chatgpt-to-public.jumpermcp.dev/",
+    );
+    await tab.goto(`http://127.0.0.1:${address.port}/available`);
+    assert.equal(
+      await tab
+        .getByRole("button", { name: "Update Publisher", exact: true })
+        .count(),
+      1,
     );
     assert.deepEqual(errors, []);
   } finally {

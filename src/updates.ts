@@ -84,6 +84,11 @@ export class Updates {
       "stale_update",
       "The Publisher changed since this update was reviewed.",
     );
+    requireThat(
+      op.release.manifest.version !== this.env.RELEASE_VERSION,
+      "already_installed",
+      "You already have this version installed.",
+    );
     op.state = "queued";
     this.store.put("publisher-update", op);
   }
