@@ -1,0 +1,20 @@
+{
+  "manifest": {
+    "version": "0.1.10",
+    "commit": "4a538281078121aec208a6251171543d53d78904",
+    "schema": 1,
+    "migration_tag": "v1",
+    "durable_object_class": "Publisher",
+    "compatibility_date": "2026-09-01",
+    "modules": [
+      {
+        "name": "worker.js",
+        "sha256": "9ff26f7394694daf73540a3c868eab8a3951b31990605e4fa523bc67a7705e98",
+        "size": 2014799,
+        "type": "application/javascript+module"
+      }
+    ],
+    "notes": "# 0.1.10 — a compact blue Publisher cockpit\n\nThe owner control panel now shares the installer's navy/teal palette and Outfit typography. Five bento panels keep projects, ChatGPT connection, recent operations, Cloudflare settings, and updates in one desktop viewport. Project and activity lists scroll independently; uncommon and destructive controls use native expandable details. Small screens use a stacked layout. Setup, login, and consent pages share the refreshed visual language.\n\nThe supplied Protected by Cloudflare badge appears in the upper right at one-third of its source width on desktop. Badge and font are embedded in the signed Worker bundle, with no external asset dependency. CSP permits only data images/fonts in addition to the existing inline styles and validated form destinations; scripts remain disabled. Existing actions, CSRF checks, project deletion confirmation, and installation receipt remain available.\n\nBrowser coverage checks desktop fit at 1440×900, 1366×768, and 1024×768 in both color schemes; mobile overflow, empty/setup states, badge rendering, and project-management form fields/submission. Includes the 0.1.9 retry scheduling fix. No migration, credential, Worker name, or origin changes.\n"
+  },
+  "signature": "0FsN+HTNQYDIgMVXB+mgNcmTsrt0hWrNSJVpNmhbFc9JHP0zLGoNqMuevB2SPreQAzlA6H46LhRnkD+TgdGfDw=="
+}

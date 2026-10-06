@@ -275,3 +275,9 @@ This is safe between steps because Publisher serializes requests and alarms. Upd
 The independent tester confirmed the 0.1.8 update succeeded. A separate runtime regression found that MCP status calls reset retry alarms and could keep deferring publication. The 0.1.9 scheduler preserves earlier alarms. For an installation already running 0.1.8, set `RELEASE_BASE_URL` to `https://chatgpt-to-public.jumpermcp.dev/releases/0.1.9/`, deploy that configuration, and use the normal reviewed update. No code edit is needed; leave `RELEASE_VERSION` to the updater.
 
 This does not establish the underlying Cloudflare activation error. Obtain the displayed Publisher version and the exact Recent operations entry, including method/path, HTTP status and numeric codes. “Private / unpublished” describes project visibility, not whether its operation is retrying. Record actual provider diagnostics rather than ChatGPT's paraphrase.
+
+## 0.1.10: blue owner cockpit
+
+Set the installed Publisher's `RELEASE_BASE_URL` to `https://chatgpt-to-public.jumpermcp.dev/releases/0.1.10/` and deploy that configuration. Leave `RELEASE_VERSION` unchanged, then check/review/apply 0.1.10 in Publisher. It includes the 0.1.9 timer fix, so 0.1.8 installations can update directly. No code edit, reinstall, Worker rename, or ChatGPT reconnection is needed for this design update.
+
+The redesign preserves native owner forms and uses the supplied Cloudflare badge to identify the hosting boundary. See `docs/owner-cockpit-design.md` for layout and local browser verification. Renaming the Worker is a separate origin migration with user-visible connection effects, documented in QUIRKS.md; it is not part of this release.

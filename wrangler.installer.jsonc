@@ -27,7 +27,7 @@
     "INSTALLER_ORIGIN": "https://chatgpt-to-public.jumpermcp.dev",
     "CLIENT_ID": "af114d63e7199023c165b59009ffb38d",
     "REQUIRED_SCOPES": "[\"account-settings.read\",\"workers-scripts.write\",\"workers-kv-storage.write\"]",
-    "RELEASE_BASE_URL": "https://chatgpt-to-public.jumpermcp.dev/releases/0.1.9/",
+    "RELEASE_BASE_URL": "https://chatgpt-to-public.jumpermcp.dev/releases/0.1.10/",
     "RELEASE_PUBLIC_KEY": "J8n5q/f3GMMG0dX27iwZxYx9K5+QLDbbRl/yQiwy/9M=",
     "CHATGPT_CALLBACKS": "[\"https://chatgpt.com/connector_platform_oauth_redirect\"]",
     "FILE_DOWNLOAD_HOSTS": "[]",
