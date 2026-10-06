@@ -14,7 +14,7 @@
     "INSTALLATION_ID": "REPLACE_WITH_RANDOM_UUID",
     "CHATGPT_CALLBACKS": "[\"https://chatgpt.com/connector_platform_oauth_redirect\"]",
     "FILE_DOWNLOAD_HOSTS": "[]",
-    "RELEASE_VERSION": "0.1.9"
+    "RELEASE_VERSION": "0.1.10"
   },
   "observability": { "enabled": false }
 }

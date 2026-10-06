@@ -1,0 +1,11 @@
+# Publisher owner cockpit
+
+The installed owner UI uses the existing installer palette: navy `#142039`, teal `#246780`, pale blue `#d9eaf0`, and the existing self-hosted Outfit typeface. This replaces the earlier green single-column cards. The brief calls for a dense private cockpit rather than a marketing page: design variance 5, motion intensity 1, visual density 8. Native CSS Grid and forms preserve the Worker's current server-rendered architecture; no frontend framework or scripting is required.
+
+The desktop frame contains five panels: projects, ChatGPT connection/receipt, recent operations, Cloudflare settings, and updates. The top bar identifies the page as running in the user's own Cloudflare account. The supplied Cloudflare badge is 254 pixels wide on desktop (one-third of its 761-pixel source) and retains its aspect ratio. Data, error text, and hostnames are escaped before rendering. The badge and licensed font are embedded in the Worker, so the control panel has no installer asset dependency.
+
+At desktop widths of at least 1024 pixels and heights of at least 650 pixels, the frame fits the viewport and panel bodies scroll. Smaller/shorter viewports revert to document scrolling with bounded lists. Project management, token replacement, technical receipt details, and update explanations use native details elements. The delete action still requires an explicit project ID. Keyboard-visible focus, labeled scroll regions, native forms, empty states, and automatic light/dark themes are preserved.
+
+`tests/browser/dashboard.test.ts` exercises 1440×900, 1366×768, 1024×768, and 390×844 layouts, checks layout overflow and asset loading under CSP, and verifies project management submission and disconnected setup. Its screenshots use local test data, not production captures. The existing browser tests exercise form origins and OAuth navigation. No Worker rename or authorization change is part of the redesign.
+
+Embedded resources in `src/owner-assets.ts` are base64 copies of `assets/cloudflare-badge.png` and `public/design/outfit-variable.ttf`; the font license is `public/design/outfit-OFL.txt`.

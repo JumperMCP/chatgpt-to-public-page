@@ -1,5 +1,6 @@
+import { dashboard } from "./dashboard";
 import { AuthorizationError } from "@cloudflare/workers-oauth-provider";
-import { ownerLogin, ownerSetup, cloudflareSettings } from "./owner-ui";
+import { ownerLogin, ownerSetup } from "./owner-ui";
 import { Updates } from "./updates";
 import { refreshCloudflare } from "./cloudflare-oauth";
 import { DurableObject } from "cloudflare:workers";
@@ -451,8 +452,31 @@ export class Publisher extends DurableObject<Env> {
           .sort((a, b) => b.created - a.created)
           .slice(0, 10);
       return page(
-        "Your public projects",
-        `<p>Personal pages and smallish projects that need immediate visibility.</p><p>Publisher ${e(this.env.RELEASE_VERSION)} · Retained content: ${(projects.retained_bytes / 1024 / 1024).toFixed(2)} MiB of 250 MiB.</p><div class="identity"><span>Running in your Cloudflare account</span><strong>${e(new URL(this.env.PUBLISHER_ORIGIN).hostname)}</strong></div><section><h2>Connect ChatGPT</h2><p>In ChatGPT → Plugins, click “Add custom MCP server”. Use the MCP URL from <a href="#installation-receipt">Settings → Cloudflare → Installation receipt</a> below.</p><p>Website publishing: <strong>${e(health.state === "connected" ? "Connected to Cloudflare" : "Connect Cloudflare in Settings below")}</strong></p></section>${projects.projects.map((p) => `<section><h2>${e(p.name)}</h2><p><a href="${e(p.url)}" rel="noreferrer">${e(p.url)}</a> · ${p.live ? "Published" : "Private / unpublished"}</p><small>Project ID: ${e(p.id)}</small>${p.head ? form("/export", session.csrf, hidden("project", p.id) + "<button>Export files</button>") : ""}${form("/unpublish", session.csrf, hidden("project", p.id) + hidden("base", p.head) + "<button>Unpublish</button>")}${form("/delete", session.csrf, hidden("project", p.id) + hidden("base", p.head) + `<label>To permanently delete this project and its history, enter <code>${e(p.id)}</code><input name="confirmation" required></label><button>Delete project permanently</button>`)}</section>`).join("") || "<p>No projects yet. Connect ChatGPT and publish your reviewed files.</p>"}<section><h2>Recent operations</h2>${operations.map((op) => `<p>${e(op.kind)}: ${e(op.state)}${op.reachable === false ? " · awaiting reachability" : ""}<br><small>${e(op.error?.message ?? "")}</small></p>`).join("") || "<p>No operations yet.</p>"}</section>${cloudflareSettings(this.env.PUBLISHER_ORIGIN, this.env.ACCOUNT_ID, session.csrf, { installation: this.env.INSTALLATION_ID, account: this.env.ACCOUNT_ID, publisher: this.env.PUBLISHER_ORIGIN, mcp: this.env.PUBLISHER_ORIGIN + "/mcp", version: this.env.RELEASE_VERSION, durable_object: this.ctx.id.toString(), oauth_kv: this.env.OAUTH_KV_ID ?? "See Cloudflare bindings", sites: this.store.list("remote:").map(([, v]) => v) })}<section><h2>Publisher updates</h2><p>Publishing pauses between steps during an update and resumes afterward.</p><p>Update state: ${e(update?.state ?? "No update checked")}. ${e(update?.error?.message ?? "")}</p>${form("/updates/check", session.csrf, "<button>Check for updates</button>")}${update?.state === "review" ? `<h3>Review ${e(update.release.manifest.version)}</h3><pre>${e(update.release.manifest.notes)}</pre>${form("/updates/apply", session.csrf, hidden("update", update.id) + "<button>Update Publisher</button>")}` : ""}</section>${form("/logout", session.csrf, "<button>Sign out</button>")}`,
+        "Publishing, at a glance.",
+        dashboard({
+          origin: this.env.PUBLISHER_ORIGIN,
+          account: this.env.ACCOUNT_ID,
+          version: this.env.RELEASE_VERSION,
+          csrf: session.csrf,
+          projects,
+          operations,
+          connected: health.state === "connected",
+          update,
+          receipt: {
+            installation: this.env.INSTALLATION_ID,
+            account: this.env.ACCOUNT_ID,
+            publisher: this.env.PUBLISHER_ORIGIN,
+            mcp: this.env.PUBLISHER_ORIGIN + "/mcp",
+            version: this.env.RELEASE_VERSION,
+            durable_object: this.ctx.id.toString(),
+            oauth_kv: this.env.OAUTH_KV_ID ?? "See Cloudflare bindings",
+            sites: this.store.list("remote:").map(([, v]) => v),
+          },
+        }),
+        200,
+        {},
+        undefined,
+        true,
       );
     }
     throw new Problem("not_found", "Page not found.", 404);
