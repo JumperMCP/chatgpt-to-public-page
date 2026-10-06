@@ -469,6 +469,15 @@ h2 {
 .questions details[open] summary span {
   transform: rotate(45deg);
 }
+.questions ol {
+  padding-left: 22px;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.7;
+}
+.questions li + li {
+  margin-top: 10px;
+}
 .questions p {
   font-size: 14px;
   line-height: 1.7;
@@ -560,6 +569,9 @@ label {
 .error-tile > p {
   max-width: 600px;
   margin: 25px 0;
+}
+.error-tile > form {
+  margin-top: 32px;
 }
 .error-tile h1 {
   font-size: 52px;
