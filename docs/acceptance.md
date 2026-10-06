@@ -12,7 +12,7 @@ The plan remains [PRD/technical-plan.md](../PRD/technical-plan.md). This ledger 
 | Installer | Browser PKCE, account selection, durable progress/retry, grant expiry/erasure, signed release, token fallback | Independent install, setup, receipt retrieval and publishing confirmed by tester; still test permission denial and resource-level partial-install recovery |
 | Cloudflare refresh | Encrypted credentials, serialized refresh, durable replacement, interrupted-rotation reconnect tests | Handoff on public client, expiry/rotation/idle/revocation observations; no lifetime assumptions |
 | Updates | Signed manifest/checksums and reconciliation tests; tester confirmed updates through 0.1.8 with existing project subsequently published | Explicit preservation audit, controlled failed-update/known-good recovery, independent 0.1.9 update |
-| Distribution | MIT, pinned dependencies/lockfile, CI; signed 0.1.11 hosted on installer domain, HTTPS downloads and signature verified | Independently distributed key, issued build provenance |
+| Distribution | MIT, pinned dependencies/lockfile, CI; signed 0.1.12 hosted on installer domain, HTTPS downloads and signature verified | Independently distributed key, issued build provenance |
 | Documentation/media | Current scope, setup/recovery/uninstall, source-linked architecture, comparisons | Real screenshots, README GIF, captioned video, recorded novice test |
 
 ## Experiment 1: Cloudflare ownership
@@ -128,3 +128,7 @@ Release 0.1.10 applies the installer blue bento design to the installed owner UI
 ## Cockpit refinements and same-version update review — 2026-10-05
 
 Release 0.1.11 removes cockpit header links/H1, moves bold sign-out beside the hosting footer, clarifies settings/version/source labels, and increases scrollbar visibility. Same-version release notes remain readable while both the UI and server prevent a redundant install. Installer copy now uses a FAQ-only introduction and eleven practical questions derived from the testing log. Local desktop/mobile FAQ previews were checked for overflow; browser tests exercise current/different-version reviews and cockpit layout/forms. All 37 Node/runtime and three browser tests passed. Signed from clean source `ea3d14e946b591623db6efcc78376514f8ee5ed6`; CI provenance remains unissued. Existing Publishers must apply the release to receive these changes.
+
+## Compact project rows — 2026-10-05
+
+Release 0.1.12 shortens the brand to Publisher and list heading to Public projects. Collapsed project links, statuses and Manage controls occupy one row; full addresses and existing native forms appear below when expanded. Desktop/mobile browser layout and project management submission checks passed, along with all 37 Node/runtime and three browser tests. Signed from clean source `fe23b4ba3e4a45ec597d47c538907a9f983dcd33`. Existing installations require the normal update; CI provenance remains unissued.

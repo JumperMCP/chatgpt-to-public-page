@@ -285,3 +285,7 @@ The redesign preserves native owner forms and uses the supplied Cloudflare badge
 ## 0.1.11: cockpit refinements and clearer FAQs
 
 The public installer receives its FAQ and header changes on deployment. Existing Publisher owners can set `RELEASE_BASE_URL` to `https://chatgpt-to-public.jumpermcp.dev/releases/0.1.11/`, deploy that configuration, and check/review/apply the release. Leave `RELEASE_VERSION` unchanged. Once 0.1.11 is installed, checking that same source retains release notes without offering another install. Older UI code will continue to offer the redundant button until updated.
+
+## 0.1.12: compact project list
+
+Use `https://chatgpt-to-public.jumpermcp.dev/releases/0.1.12/` for `RELEASE_BASE_URL`, deploy that configuration, then check/review/apply the update in Publisher. Leave `RELEASE_VERSION` unchanged. This release shortens the brand/project headings and places each collapsed project link, status and Manage control on a single row. Expanded controls remain native forms; no reconnect or migration is needed.
