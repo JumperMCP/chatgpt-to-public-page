@@ -1,0 +1,20 @@
+{
+  "manifest": {
+    "version": "0.1.11",
+    "commit": "ea3d14e946b591623db6efcc78376514f8ee5ed6",
+    "schema": 1,
+    "migration_tag": "v1",
+    "durable_object_class": "Publisher",
+    "compatibility_date": "2026-09-01",
+    "modules": [
+      {
+        "name": "worker.js",
+        "sha256": "7fc53036967b4c028c6b207badbc81300ddf48c1522010dab55c33c7c4805a4a",
+        "size": 2015843,
+        "type": "application/javascript+module"
+      }
+    ],
+    "notes": "# 0.1.11 — quieter cockpit and clearer setup help\n\nRemove the cockpit header navigation and main heading, place the bold sign-out control beside the hosting footer, clarify Cloudflare settings and installed-version labels, and add a link to the installer. Panel scrollbars are wider and higher contrast, with 10px styling where supported and native-width Firefox scrollbars.\n\nChecking the currently installed release keeps its review notes visible without offering Update Publisher. The server also rejects same-version apply requests without queuing an update. Regression coverage checks the review-only behavior, blocked submission, and normal update admission for a different release.\n\nThe installer replaces its preview introduction with Frequently Asked Questions, simplifies all answers, and adds practical guidance from independent testing: exact /mcp URL, account/workspace selection, publishing key and owner password, mobile/fresh-chat editing, delayed publication, and renaming. Remove the extra header link, decorative eyebrow dash, and redundant installation line. No migration, credential, or origin changes.\n"
+  },
+  "signature": "eIyu4zQ0KoWmLdtn0F0zb0Mr2KnbSNY06DsSvCYYJD+bLJGdu7xchzOFQwR8rLopLTsyBSOmjKQd18lijTWuCA=="
+}

@@ -12,7 +12,7 @@ The plan remains [PRD/technical-plan.md](../PRD/technical-plan.md). This ledger 
 | Installer | Browser PKCE, account selection, durable progress/retry, grant expiry/erasure, signed release, token fallback | Independent install, setup, receipt retrieval and publishing confirmed by tester; still test permission denial and resource-level partial-install recovery |
 | Cloudflare refresh | Encrypted credentials, serialized refresh, durable replacement, interrupted-rotation reconnect tests | Handoff on public client, expiry/rotation/idle/revocation observations; no lifetime assumptions |
 | Updates | Signed manifest/checksums and reconciliation tests; tester confirmed updates through 0.1.8 with existing project subsequently published | Explicit preservation audit, controlled failed-update/known-good recovery, independent 0.1.9 update |
-| Distribution | MIT, pinned dependencies/lockfile, CI; signed 0.1.10 hosted on installer domain, HTTPS downloads and signature verified | Independently distributed key, issued build provenance |
+| Distribution | MIT, pinned dependencies/lockfile, CI; signed 0.1.11 hosted on installer domain, HTTPS downloads and signature verified | Independently distributed key, issued build provenance |
 | Documentation/media | Current scope, setup/recovery/uninstall, source-linked architecture, comparisons | Real screenshots, README GIF, captioned video, recorded novice test |
 
 ## Experiment 1: Cloudflare ownership
@@ -124,3 +124,7 @@ During testing, the user discovered two ChatGPT accounts were in use. After an a
 ## Owner cockpit redesign — 2026-10-05
 
 Release 0.1.10 applies the installer blue bento design to the installed owner UI, with the supplied Cloudflare badge, bounded scrolling panels, compact native forms, and embedded design assets. Browser checks passed for desktop viewport fit at 1440×900, 1366×768 and 1024×768 in light and dark schemes; mobile at 390×844; asset/CSP loading; empty/disconnected states; and project management submission. The existing form-origin/OAuth navigation browser tests also passed. All 36 runtime/unit tests passed. Signed from clean source `4a538281078121aec208a6251171543d53d78904`; CI provenance remains unissued. Screenshots are local fixture previews, not tester production captures. Existing installations need to apply the update; no Worker rename or origin migration was performed.
+
+## Cockpit refinements and same-version update review — 2026-10-05
+
+Release 0.1.11 removes cockpit header links/H1, moves bold sign-out beside the hosting footer, clarifies settings/version/source labels, and increases scrollbar visibility. Same-version release notes remain readable while both the UI and server prevent a redundant install. Installer copy now uses a FAQ-only introduction and eleven practical questions derived from the testing log. Local desktop/mobile FAQ previews were checked for overflow; browser tests exercise current/different-version reviews and cockpit layout/forms. All 37 Node/runtime and three browser tests passed. Signed from clean source `ea3d14e946b591623db6efcc78376514f8ee5ed6`; CI provenance remains unissued. Existing Publishers must apply the release to receive these changes.

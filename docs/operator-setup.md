@@ -281,3 +281,7 @@ This does not establish the underlying Cloudflare activation error. Obtain the d
 Set the installed Publisher's `RELEASE_BASE_URL` to `https://chatgpt-to-public.jumpermcp.dev/releases/0.1.10/` and deploy that configuration. Leave `RELEASE_VERSION` unchanged, then check/review/apply 0.1.10 in Publisher. It includes the 0.1.9 timer fix, so 0.1.8 installations can update directly. No code edit, reinstall, Worker rename, or ChatGPT reconnection is needed for this design update.
 
 The redesign preserves native owner forms and uses the supplied Cloudflare badge to identify the hosting boundary. See `docs/owner-cockpit-design.md` for layout and local browser verification. Renaming the Worker is a separate origin migration with user-visible connection effects, documented in QUIRKS.md; it is not part of this release.
+
+## 0.1.11: cockpit refinements and clearer FAQs
+
+The public installer receives its FAQ and header changes on deployment. Existing Publisher owners can set `RELEASE_BASE_URL` to `https://chatgpt-to-public.jumpermcp.dev/releases/0.1.11/`, deploy that configuration, and check/review/apply the release. Leave `RELEASE_VERSION` unchanged. Once 0.1.11 is installed, checking that same source retains release notes without offering another install. Older UI code will continue to offer the redundant button until updated.
