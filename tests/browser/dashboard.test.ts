@@ -3,6 +3,8 @@ import assert from "node:assert/strict";
 import { createServer } from "node:http";
 import { once } from "node:events";
 import { mkdir } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { chromium } from "playwright";
 import { dashboard } from "../../src/dashboard";
 import { page } from "../../src/ui";
@@ -98,7 +100,8 @@ test("Publisher cockpit fits desktop, scrolls long lists, and preserves owner fo
     if (msg.type() === "error") errors.push(msg.text());
   });
   try {
-    await mkdir("tmp/design-review", { recursive: true });
+    const reviewDirectory = join(tmpdir(), "publisher-design-review");
+    await mkdir(reviewDirectory, { recursive: true });
     for (const theme of ["light", "dark"] as const) {
       await tab.emulateMedia({ colorScheme: theme });
       for (const viewport of [
@@ -132,7 +135,7 @@ test("Publisher cockpit fits desktop, scrolls long lists, and preserves owner fo
         );
         if (viewport.width === 1366)
           await tab.screenshot({
-            path: `tmp/design-review/cockpit-${theme}.png`,
+            path: join(reviewDirectory, `cockpit-${theme}.png`),
             fullPage: true,
           });
       }
@@ -146,7 +149,7 @@ test("Publisher cockpit fits desktop, scrolls long lists, and preserves owner fo
       ),
     );
     await tab.screenshot({
-      path: "tmp/design-review/cockpit-mobile.png",
+      path: join(reviewDirectory, "cockpit-mobile.png"),
       fullPage: true,
     });
     await tab
