@@ -1,5 +1,8 @@
 #user
 id_ed25519*
+README_tmp.md
+tmp/*
+linkedin-qmllc.html
 
 node_modules/
 dist/
@@ -8,3 +11,5 @@ dist/
 .env*
 !.env.example
 coverage/
+__pycache__/
+marketing/linkedin-article-image/images/

@@ -1,0 +1,210 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "From chat to public website",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1200,
+      660
+    ],
+    "legend": {
+      "mode": "hidden"
+    }
+  },
+  "components": [
+    {
+      "id": "you",
+      "type": "external",
+      "label": "You",
+      "sublabel": "Ask in plain words",
+      "pos": [
+        40,
+        270
+      ],
+      "size": [
+        150,
+        76
+      ]
+    },
+    {
+      "id": "chatgpt",
+      "type": "frontend",
+      "label": "ChatGPT",
+      "sublabel": "Publisher plugin",
+      "brand": "openai",
+      "pos": [
+        262,
+        270
+      ],
+      "size": [
+        160,
+        76
+      ]
+    },
+    {
+      "id": "installer",
+      "type": "external",
+      "label": "Installer",
+      "sublabel": "One-time setup",
+      "pos": [
+        530,
+        60
+      ],
+      "size": [
+        160,
+        76
+      ]
+    },
+    {
+      "id": "publisher",
+      "type": "backend",
+      "label": "Your Publisher",
+      "sublabel": "Runs on Cloudflare",
+      "brand": "cloudflare",
+      "pos": [
+        530,
+        270
+      ],
+      "size": [
+        160,
+        76
+      ]
+    },
+    {
+      "id": "site",
+      "type": "cloud",
+      "label": "Your website",
+      "sublabel": "Public address",
+      "pos": [
+        790,
+        270
+      ],
+      "size": [
+        160,
+        76
+      ]
+    },
+    {
+      "id": "visitors",
+      "type": "external",
+      "label": "Visitors",
+      "sublabel": "Any device",
+      "pos": [
+        1020,
+        270
+      ],
+      "size": [
+        140,
+        76
+      ]
+    },
+    {
+      "id": "cockpit",
+      "type": "frontend",
+      "label": "Cockpit",
+      "sublabel": "Your control panel",
+      "pos": [
+        530,
+        480
+      ],
+      "size": [
+        160,
+        76
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Your Cloudflare account",
+      "wraps": [
+        "publisher",
+        "site",
+        "cockpit"
+      ],
+      "pad": 30
+    }
+  ],
+  "connections": [
+    {
+      "id": "you-to-chatgpt",
+      "from": "you",
+      "to": "chatgpt",
+      "label": "prompt",
+      "variant": "emphasis"
+    },
+    {
+      "id": "chatgpt-to-publisher",
+      "from": "chatgpt",
+      "to": "publisher",
+      "label": "publish",
+      "variant": "emphasis"
+    },
+    {
+      "id": "publisher-to-site",
+      "from": "publisher",
+      "to": "site",
+      "label": "puts online",
+      "variant": "emphasis"
+    },
+    {
+      "id": "site-to-visitors",
+      "from": "site",
+      "to": "visitors",
+      "label": "open",
+      "variant": "emphasis"
+    },
+    {
+      "id": "installer-to-publisher",
+      "from": "installer",
+      "to": "publisher",
+      "label": "sets up once",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelAt": [
+        610,
+        196
+      ]
+    },
+    {
+      "id": "publisher-to-cockpit",
+      "from": "publisher",
+      "to": "cockpit",
+      "label": "manage & undo",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelAt": [
+        610,
+        413
+      ]
+    }
+  ],
+  "cards": [
+    {
+      "dot": "amber",
+      "title": "1 \u00b7 Set up once",
+      "items": [
+        "The installer puts your own Publisher into your Cloudflare account",
+        "You connect it to ChatGPT as a plugin"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "2 \u00b7 Publish by asking",
+      "items": [
+        "Ask ChatGPT to publish what it built",
+        "Weeks later, a new chat can edit the same site"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "3 \u00b7 Stay in control",
+      "items": [
+        "The Cockpit lists every site",
+        "Undo, export, unpublish, or delete anytime"
+      ]
+    }
+  ]
+}
