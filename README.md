@@ -1,49 +1,128 @@
-# ChatGPT-to-Public
+# Publisher for ChatGPT
 
-A self-hosted Publisher for **personal pages; smallish projects that need immediate visibility**. Keep approved static website files in your own Cloudflare account, publish them at stable addresses, edit from later conversations, and undo a publication.
+Ask ChatGPT for a web page, get a public address, and come back weeks later in a new chat to change it. The pages live in **your own Cloudflare account**, on the free plan. Made for personal pages and smallish projects that need to be visible right away.
 
-**Pre-release implementation. Not ready for a public launch.** Local tests exercise storage, ownership, OAuth, MCP, and failure handling. Real Cloudflare deployment, independent-account installation, ChatGPT file transfer, free-plan performance, and novice usability still require the [acceptance experiments](docs/acceptance.md). The operator has configured a public Cloudflare OAuth client. The installer and signed release downloads are deployed at [chatgpt-to-public.jumpermcp.dev](https://chatgpt-to-public.jumpermcp.dev/); end-to-end authorization and independent-account provisioning remain pending. The current code defaults to the API-token fallback; token-free onboarding is not a verified claim.
+You already swapped coding for prompting. Publisher drops the next chore: downloading files, finding a host, and uploading again for every small fix.
 
-Project snapshots live in a SQLite-backed Durable Object. Cloudflare KV holds Publisher OAuth records. ChatGPT can request its normal confirmations; this is not a promise of a zero-click workflow or unlimited model payloads.
+**Install:** [chatgpt-to-public.jumpermcp.dev](https://chatgpt-to-public.jumpermcp.dev/) · **Example site:** [pants-math.snlr308.workers.dev](https://pants-math.snlr308.workers.dev/) · **Contents:** [Part 1, for everyone](#part-1-for-everyone) · [How it compares](#how-it-compares) · [Part 2, for technical readers](#part-2-for-technical-readers)
 
-## Intended installation and everyday use
+![From chat to public website: you ask ChatGPT, your Publisher in your Cloudflare account puts the site online, and the Cockpit lets you manage, undo and update.](marketing/pipeline-diagram/pipeline-clean.png)
 
-You need a Cloudflare account with permission to create Workers and KV namespaces, an activated `workers.dev` subdomain, and a ChatGPT account whose interface offers custom MCP connections. Free-tier ChatGPT compatibility has not been established. End users should not need GitHub, a terminal, a build service, or an OpenAI API key. Operator setup is separate: see [the operator runbook](docs/operator-setup.md).
+---
 
-1. Open `https://chatgpt-to-public.jumpermcp.dev` once the installer is deployed, then select **Install on my Cloudflare**.
-2. Authorize Cloudflare account provisioning and choose an account. Installation progress persists across retries. If account verification or `workers.dev` activation is required, finish it in the dashboard and resume.
-3. Open the short-lived setup link on your own Publisher and create the owner password. An arbitrary first visitor cannot claim it.
-4. If independent OAuth refresh has not been verified, create an account-scoped **Workers Scripts Edit** API token and enter it directly in your Publisher. Do not send the token through ChatGPT. The UI validates account/subdomain access; deployment validates write access.
-5. Use **ChatGPT → Plugins → Add → Create custom MCP server**, enter the Publisher's `/mcp` URL, sign in to the Publisher, and explicitly consent to project access. This is the target setup path; a recording from the tested interface is still required before launch. Callback registration remains disabled until exact callbacks have been verified and configured.
-6. Publish only the reviewed artifacts. In a fresh chat, identify the site by project ID, name, or its saved URL and request an edit. Ask to undo to republish the preceding snapshot.
+# Part 1: For everyone
 
-First-publish prompt:
+## What it does
+
+You ask ChatGPT: *"Create a website about a new science called Pants Math, with a widget where visitors test pants hypotheses. Publish it on my website."* It writes the site, hands it to your Publisher, and replies with an address like `https://pants-math.<your-name>.workers.dev`.
+
+A month later, in a fresh chat, maybe on your phone: *"Make the pants-math background blue."* ChatGPT finds the site, changes only that, and republishes at the same address. Don't like it? Ask it to undo.
+
+No GitHub, terminal, build step, or OpenAI API key. Depending on your ChatGPT settings, it may ask you to confirm a publish.
+
+## Watch it
+
+| One-time setup | Everyday use |
+|:-:|:-:|
+| [![How to install the Publisher plugin](https://img.youtube.com/vi/s7Oz0lrCuuE/hqdefault.jpg)](https://www.youtube.com/watch?v=s7Oz0lrCuuE) | [![Everyday use of the Publisher plugin](https://img.youtube.com/vi/P0WYFshgFnc/hqdefault.jpg)](https://www.youtube.com/watch?v=P0WYFshgFnc) |
+| [How to install](https://www.youtube.com/watch?v=s7Oz0lrCuuE) | [Everyday use](https://www.youtube.com/watch?v=P0WYFshgFnc) |
+
+## What you need
+
+- A Cloudflare account where you can create Workers and KV namespaces. The free plan is enough. If Cloudflare asks you to verify the account or switch on `workers.dev`, the installer waits until you have.
+- A ChatGPT account, free or paid. Free accounts first switch on **Developer mode** under Settings → Security and login.
+
+Claude Desktop, Cursor and other MCP clients connect the same way; ChatGPT is the one we test against.
+
+## Set it up once
+
+1. Open [chatgpt-to-public.jumpermcp.dev](https://chatgpt-to-public.jumpermcp.dev/), choose **Install on my Cloudflare**, sign in to Cloudflare and pick an account. If you're interrupted, it resumes where it stopped.
+2. Open the setup link it shows you and create your password. The link is single-use and expires quickly, so nobody else can claim your Publisher.
+3. In your Publisher's **Cloudflare settings**, add a Cloudflare API token with **Workers Scripts Edit** permission. The page walks you through creating it. Paste it there only, never into ChatGPT.
+4. In ChatGPT, open **Plugins → Add → Custom MCP server** and paste the MCP URL from your Publisher's **ChatGPT connection** panel, including `/mcp` at the end. Sign in and approve access.
+
+## Everyday use
+
+Just ask. Name a site, give its project ID, or paste its address in any new chat to edit it; you don't need to find the original conversation. Ask to undo, and the previous version goes back online.
+
+Your Publisher's control panel lists every site. From there you can unpublish (the site goes offline, the files stay), export, delete, and choose when to update the Publisher itself.
+
+Two safety nets work in the background. If ChatGPT tries to rewrite far more than you asked for (the classic "rest of the code unchanged"), the Publisher flags it instead of publishing. And two chats editing the same site can't silently overwrite each other.
+
+If you want ChatGPT extra careful on a first publish, add this:
 
 > Publish only the website files I have explicitly selected and reviewed. These files will become public. Preserve their bytes, include the approved images, and stop if you cannot access an artifact. Do not reconstruct missing files or publish unrelated conversation content. Return the public URL and operation status. If this changes an existing project, read its current revision first.
 
-The [recording checklist](docs/acceptance.md#recordings) specifies the README GIF and captioned setup video. They are intentionally absent until real successful UI sessions can be recorded.
+## What it can host
 
-## Supported content and limits
+Finished websites: HTML, CSS, JavaScript, images and other small files, loose or as a ZIP, with an `index.html`. React or Vue sites work if you upload the built output.
 
-Upload ZIP archives or individual static files, or send bounded text changes. Include `index.html`. Compiled output from frontend frameworks is supported; builds, package installation, server code, application databases, teams, custom domains, and large media hosting are out of scope. Uploaded code is never executed in the Publisher.
+Not supported: databases, large videos, or teams. Server code is planned. Your own domain works if you attach it to the site in Cloudflare; doing it from the chat is planned. Uploaded files are served, never run.
 
-| Limit | Configured value (free-account verification pending) |
-| --- | --- |
-| Projects | 20 |
-| Files per project | 100 |
-| Uncompressed project | 25 MiB |
-| Individual file | 10 MiB |
-| Retained file content, including staging | 250 MiB, deduplicated |
-| Publication history | Latest 20 successful snapshots |
-| Abandoned candidate lifetime | 24 hours |
-| Inline text per file / MCP request body | 256 KiB / 1 MiB |
-| Text response | Up to 16,000 characters with continuation |
+Limits: 20 sites of up to 100 files and 25 MB each, files up to 10 MB, the last 20 versions of each site kept for undo.
 
-Ordinary static routing is the default. `404.html` selects 404-page behavior; SPA fallback requires explicit intent. `_headers` and `_redirects` are validated and passed as direct-upload configuration, while their original files remain in snapshots and exports. V1 accepts relative header paths and up to 100 relative-source redirect rules; unsupported syntax is rejected. `.assetsignore` is rejected: remove unwanted files before uploading. `noindex` is an indexing request, not privacy or access control.
+## Cost and privacy
 
-Account quotas are shared with your other Cloudflare resources. Name availability, verification, account naming, and acceptable-use requirements remain your responsibility. The code never enables billing or upgrades your plan. A `workers.dev` account subdomain may contain identifying information; change account naming through Cloudflare if needed. Hosting success does not guarantee identical rendering across browsers.
+- Publisher is free and MIT licensed. It never turns on billing or upgrades your Cloudflare plan, but it does share your account's free allowance with whatever else runs there.
+- Your sites and their traffic never pass through Jumper MCP, which only provides the installer. Existing sites keep working even if the installer goes down.
+- Everything you publish is public, and copies can't be recalled. A "noindex" request doesn't make a page private.
+- Your `workers.dev` address may include part of your name or email. Cloudflare lets you change it.
+- Site names, account verification, and Cloudflare's acceptable-use rules are between you and Cloudflare.
 
-## How this reduces effort and how it is secured
+## When something goes wrong
+
+- **Name taken:** ChatGPT asks you for another name. The Publisher never overwrites a site it didn't create.
+- **ChatGPT can't find your file:** attach it again rather than letting it recreate the file from memory.
+- **Published but not loading yet:** try again in a few minutes; the upload itself succeeded.
+- **Out of space:** export and delete old sites. Live sites are never removed to make room.
+- **Publishing says the token is missing:** add it in your Publisher's Cloudflare settings (step 3).
+
+Everything else, including uninstalling: [recovery and uninstall](docs/recovery.md).
+
+---
+
+## How it compares
+
+No option wins everywhere, and for some needs another one is the better pick. Checked October 2026; competitors change quickly, so check their docs.
+
+![Comparison of Publisher with WebsitePublisher.ai, ChatGPT canvas, Claude artifacts, Netlify Drop, Cloudflare upload, Git-based hosting, AI app builders and the Netlify MCP server across eight criteria. The same data follows as a text table.](marketing/comparison/comparison.png)
+
+<details>
+<summary>The same comparison as a text table, with links</summary>
+
+<sub>✅ yes · 🟡 partly, or with conditions · 🔜 planned · ❌ no</sub>
+
+| | Publish from your AI chat | Hosted in your own account | Quick to set up | Edit from a later chat | Version history / undo | Your own domain | Server code | Database |
+|---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+| **[Publisher](https://chatgpt-to-public.jumpermcp.dev/)** (this project) | ✅ ChatGPT + MCP | ✅ Cloudflare | 🟡 one-time install | ✅ | ✅ last 20 | 🟡 manual today ¹ | 🔜 planned ² | ❌ |
+| **[WebsitePublisher.ai](https://www.websitepublisher.ai/)** (hosted AI publisher) | ✅ many AI chats | ❌ their platform | ✅ sign in | ✅ | ✅ count by plan | 🟡 paid plans | 🟡 built-in only | ✅ |
+| **[ChatGPT canvas](https://help.openai.com/en/articles/9930697-what-is-canvas)** (share link) | ✅ ChatGPT only | ❌ chatgpt.com | ✅ none | 🟡 original chat | 🟡 | ❌ | ❌ | ❌ |
+| **[Claude artifact](https://support.claude.com/en/articles/9547008-publish-and-share-artifacts)** (published link) | ✅ Claude only | ❌ claude.ai | ✅ none | 🟡 original chat | 🟡 | ❌ | 🟡 AI calls only | 🟡 paid plans, 20 MB |
+| **[Netlify Drop](https://app.netlify.com/drop)** (drag and drop) | ❌ manual | ✅ once claimed ³ | ✅ none | ❌ re-upload | ✅ | ✅ | 🟡 not via Drop | 🟡 not via Drop |
+| **[Cloudflare upload](https://developers.cloudflare.com/pages/get-started/direct-upload/)** (dashboard direct upload) | ❌ manual | ✅ Cloudflare | ✅ dashboard | ❌ re-upload | ✅ | ✅ | 🟡 not via upload | 🟡 not via upload |
+| **[Git-based hosting](https://developers.cloudflare.com/pages/configuration/git-integration/)** (GitHub Pages, Cloudflare, Netlify) | 🟡 repo-editing AI | 🟡 repo on GitHub | ❌ Git know-how | 🟡 via the repo | ✅ full history | ✅ | 🟡 depends on host | 🟡 depends on host |
+| **[AI app builders](https://docs.lovable.dev/features/custom-domain)** (Lovable, Bolt, v0) | 🟡 their own chat | ❌ mostly theirs | ✅ sign up | ✅ in their editor | ✅ | 🟡 paid plans | ✅ | ✅ |
+| **[Netlify MCP server](https://github.com/netlify/netlify-mcp)** (for coding tools) | 🟡 coding tools | ✅ Netlify | ❌ developer setup | 🟡 | ✅ | ✅ | ✅ | 🟡 |
+
+<sub>¹ Attach a domain to the site's Worker in Cloudflare (Settings → Domains & Routes); the domain must be on Cloudflare. Doing this from the chat is planned.</sub><br>
+<sub>² Sites are static today. Server code needs a chosen runtime, so it was left out of v1 and is planned. No database support.</sub><br>
+<sub>³ Unclaimed Netlify Drop sites are deleted within an hour.</sub><br>
+
+</details>
+
+**Pick something else** for a quick throwaway link (canvas or Claude artifact, zero setup), for logins or a database (WebsitePublisher.ai or an AI app builder), for team review and full history (Git), or for rare edits you don't mind dragging into a browser (Netlify Drop, Cloudflare upload).
+
+**Pick Publisher** if you work in ChatGPT and want a stable address in an account you control, editable from any future chat.
+
+---
+
+# Part 2: For technical readers
+
+## Verification
+
+Current release: 0.1.12, signed and served from the installer domain ([release notes](docs/release-notes.md)). An independent tester on a separate Cloudflare account completed installation, owner setup, ChatGPT connection, publishing, and discovery plus editing from an unrelated smartphone session, and updated through several releases. Not yet measured: file and generated-image transfer from ChatGPT attachments, Cloudflare OAuth refresh (hence the API token in setup step 3), and free-plan CPU and memory under the maximum limits. Details: [acceptance ledger](docs/acceptance.md). To run your own installer: [operator runbook](docs/operator-setup.md).
+
+## Architecture
 
 ```mermaid
 flowchart LR
@@ -58,57 +137,60 @@ flowchart LR
   Visitors --> Site
 ```
 
-**Everyday workflow.** [Project operations](src/projects.ts) share domain logic between MCP and the management UI. Discovery and revision-specific reads provide persistent files across conversations. Exact patches preserve unmentioned files and fail atomically unless every old string matches once. Candidate revisions are private until publication; a combined request stages and publishes using a payload-bound request key. Stable hostnames survive edits and undo. [Publication operations](src/cloudflare.ts) persist progress and resume through Durable Object alarms. A disconnected chat does not cancel deployment. ChatGPT owns its normal confirmation UI; there is no second website-publication confirmation screen in the Publisher. Tests: [project lifecycle](tests/projects.test.ts), [actual Worker/OAuth/MCP integration](tests/runtime.test.ts).
+Snapshots live in a SQLite-backed Durable Object; KV holds only OAuth records. Each site is a separate assets-only Worker without Publisher credentials or bindings. Content and visitor traffic never pass through the installer, and ordinary publishing doesn't call it. Revoking the Cloudflare OAuth app is different from installer downtime and can require reconnecting.
 
-**Two authorization relationships.** Cloudflare authorization grants account provisioning/deployment capabilities; Publisher OAuth grants ChatGPT project access. [The installer](src/installer/worker.ts) implements public-client PKCE S256 and checks every configured required scope before provisioning. Its Cloudflare OAuth client must separately be promoted to public visibility. Credential handoff is gated on an operator-recorded independent refresh experiment. In fallback mode, the installer erases its temporary credential and the owner enters a scoped API token on their own Publisher. The installer records a one-hour expiry, schedules cleanup, and erases the credential and temporary encryption/handoff secrets after success. It never requests token-creation permissions.
+## Limits and serving rules
 
-[Owner authentication and credentials](src/security.ts) use a short-lived single-use setup token, salted PBKDF2 password verification, login throttling, expiring sessions, and AES-GCM credential encryption with a key in Worker secrets. Refreshes are serialized, and replacement credentials are stored before using the access token. Interrupted rotations require reconnection because remote rotation and local persistence cannot be atomic. There is no speculative periodic refresh cron. Password recovery invalidates owner sessions and existing MCP authorization epochs. Encryption at rest does not protect against malicious Publisher code or a compromised Cloudflare account. Tests: [security](tests/security.test.ts).
+| Limit | Value |
+| --- | --- |
+| Projects / files per project | 20 / 100 |
+| Uncompressed project / single file | 25 MiB / 10 MiB |
+| Retained content incl. staging | 250 MiB, deduplicated |
+| Publication history | Latest 20 successful snapshots |
+| Abandoned candidate lifetime | 24 hours |
+| Inline text per file / MCP request body | 256 KiB / 1 MiB |
+| Text response | 16,000 characters, with continuation |
 
-**Trust boundaries.** The installer sees a temporary Cloudflare grant and installation resource identifiers; routine website files, edits, and visitor traffic do not pass through it. Each website has a separate public origin and no Publisher credentials, bindings, or application Worker script in its deployment metadata. Owner cookies use the `__Host-` prefix, Secure, HttpOnly, Path=/, and SameSite. Exact-origin and CSRF checks protect writes even against sibling websites, which can be same-site. Duplicate owner cookies are rejected. [OAuth registration policy](src/oauth-policy.ts) accepts only exact configured callbacks and public clients. The owner sees explicit consent, a self-reported client identity warning, and the actual callback; the provider validates PKCE and token audience, while handlers enforce scope and owner epoch. CIMD is disabled until the real connection experiment establishes a need. Callback allowlisting does not by itself prove a client's identity.
+Static routing by default; `404.html` enables 404 behavior; SPA fallback must be explicit. `_headers` (relative paths) and `_redirects` (up to 100 relative-source rules) are validated and passed as direct-upload config, and kept in snapshots and exports. Unsupported syntax and `.assetsignore` are rejected.
 
-**Artifact transfer.** [File handling](src/files.ts) allows only HTTPS hosts explicitly approved by the operator and revalidates each redirect. Downloads have deadlines and streaming byte limits. ZIP processing bounds expanded content, rejects traversal, symlinks, encrypted archives, duplicate normalized paths and unsupported build inputs, and never runs uploaded code. Missing or expired references produce an attach/export instruction. Binary assets use ZIP export rather than oversized tool output. File hosts and ChatGPT callbacks are empty by default. Tools declare top-level authorized file inputs. Retrieved text is untrusted content. MCP annotations and model instructions guide the workflow but are not authorization or complete prompt-injection defenses. Provider errors are sanitized, and application code does not log credentials or signed download URLs. Tests: [files](tests/files.test.ts).
+## Security model
 
-**Data integrity.** [SQLite storage](src/store.ts) keeps SHA-256-addressed immutable content in 512 KiB chunks. Revisions capture files and serving settings together. Transactions enforce capacity before committing. Publication serializes each project's changes, rechecks its base, uploads all assets before activation, records version/deployment IDs, and reconciles a lost activation response. Uncertain activation stays in reconciliation rather than falsely reporting failure. Activated sites with delayed reachability remain marked published, with an explicit reachability warning. Collection preserves the current publication, retained history, and active operations. Unpublish retains editable files; confirmed deletion removes the installation-owned deployment and stored project files. Five-minute export links are bearer capabilities: anyone with a link can download until it expires. Public copies and caches cannot be recalled.
+- **Two separate authorizations.** Cloudflare authorization lets the Publisher deploy; Publisher OAuth lets ChatGPT reach projects. The [installer](src/installer/worker.ts) uses public-client PKCE S256, checks required scopes before provisioning, never asks for token-creation rights, and erases its temporary credential after handoff or a one-hour expiry. Publishing then uses an account-scoped API token the owner enters on their own Publisher; OAuth refresh handoff stays off until it is verified.
+- **Owner access** ([security.ts](src/security.ts)): single-use setup token, salted PBKDF2, throttling, expiring `__Host-` cookies, exact-origin and CSRF checks on writes (sibling sites are same-site). Credentials are AES-GCM encrypted with a key in Worker secrets; refreshes are serialized, replacements stored before use, and an interrupted rotation asks you to reconnect. Recovery invalidates sessions and MCP grants. Encryption at rest won't help against malicious Publisher code or a compromised account.
+- **ChatGPT access** ([oauth-policy.ts](src/oauth-policy.ts)): exact configured callbacks and public clients only; consent shows the self-reported client and the real callback. The provider validates PKCE and token audience; handlers enforce scope and the owner epoch. CIMD is off until needed. An allowlist alone doesn't prove client identity.
+- **Files** ([files.ts](src/files.ts)): operator-approved HTTPS hosts only (the list starts empty), redirects revalidated, deadlines and streaming byte limits. ZIPs: bounded expansion; traversal, symlinks, encryption, duplicate paths and build inputs rejected. Missing or expired references return an attach/export instruction, and binary assets leave via ZIP export rather than oversized tool output. Retrieved text is untrusted; MCP annotations guide the model but are no prompt-injection defense. Provider errors are sanitized; credentials and signed URLs are never logged.
 
-**Updates and supply-chain trust.** [Release verification](src/releases.ts) checks an Ed25519 signature against an installation-configured trust root, module checksums, compatibility, migration tag, and class identity. [Owner-approved updates](src/updates.ts) persist before upload, reverify the stored bundle, inherit configuration/bindings, explicitly preserve secret bindings, and do not replay creation migrations. The current updater accepts schema/tag v1 only. Website content is untouched. The release script requires a clean committed source tree; dependencies are pinned and locked. A release signer and installer remain trusted: a valid signature or build provenance does not prove safety or prove what a hosted installer deployed. Compare downloaded deployed modules with the numbered release and inspect source independently. Actual secret preservation, post-update decryption, and dashboard recovery still need live tests. Keep a known-good release; code rollback does not undo database changes. Tests: [release verification](tests/releases.test.ts).
+## Data integrity
 
-Existing website delivery is independent of the installer. Publisher code has no installer endpoint dependency for ordinary project operations; local tests use only its own storage and provider adapter. Live installer-outage testing is pending. Revoking the Cloudflare OAuth application is different from installer downtime and can require reconnection or a fallback token.
+MCP and the owner UI share one [project layer](src/projects.ts). [Storage](src/store.ts) keeps immutable SHA-256-addressed 512 KiB chunks; a revision captures files and serving settings together, and capacity is checked inside the transaction. Patches apply only if every old string matches exactly once. Candidate revisions stay private until published, and a combined stage-and-publish call is deduplicated by a payload-bound request key. [Publication](src/cloudflare.ts) is serialized per project, rechecks its base revision, uploads all assets before activating, records version and deployment IDs, resumes via Durable Object alarms (closing the chat doesn't cancel it), and reconciles lost activation responses rather than reporting false failures. Cleanup never touches the live publication, retained history, or active operations. Confirmed deletion removes the installation-owned deployment and its stored files. Export links are five-minute bearer links: anyone holding one can download until it expires.
+
+## Updates and supply chain
+
+[Releases](src/releases.ts) are checked against an Ed25519 trust root, module checksums, compatibility, migration tag and class identity. [Owner-approved updates](src/updates.ts) persist before upload, re-verify the stored bundle, keep bindings and secrets, never replay creation migrations, and leave site content alone. The updater currently accepts schema/tag v1 only. Releases require a clean committed source tree, with pinned and locked dependencies. The release signer and installer remain trusted parties. A valid signature doesn't prove safety or what a hosted installer deployed; compare deployed modules with the numbered release, or have an agent audit the source before installing. Code rollback doesn't undo database changes, so keep a known-good release.
+
+## Operation states worth knowing
+
+- **Conflict:** the project moved on; read the latest revision and stage the change against it.
+- **Rewrite warning:** read the candidate and clarify intent before acknowledging. Bytes are never silently repaired.
+- **Authorization or rotation failure:** reconnect Cloudflare in the owner UI, keeping the original encryption key.
+- **Activated, awaiting reachability:** the deployment is live on Cloudflare's side; retry the address later.
 
 ## Development
 
-Use Node.js 24 or newer:
+Node.js 24 or newer:
 
 ```sh
 npm ci
 npm run check
-npm run build
+npm run build      # dry run, not a deployment
 npm test
 npm run format:check
 ```
 
-`npm run build` is a **dry run**, not a deployment. Runtime integration tests need a local workerd process and loopback sockets. On NixOS, supply a compatible launcher through `MINIFLARE_WORKERD_PATH`; the npm workerd binary requires the normal Linux dynamic linker. Set `WRANGLER_LOG_PATH` to a writable path in a restricted environment.
+Runtime tests need local workerd and loopback sockets. On NixOS set `MINIFLARE_WORKERD_PATH` to a compatible launcher, since the npm workerd binary expects the standard Linux dynamic linker; in restricted environments set `WRANGLER_LOG_PATH`. Use your own `wrangler.jsonc` copy, OAuth KV namespace, and secrets (ignored `.dev.vars` or Wrangler secrets); never deploy the placeholder config. The installer builds from `wrangler.installer.jsonc` (`npm run build:installer`, also a dry run). The [operator runbook](docs/operator-setup.md) lists every required setting, the public OAuth client setup, release signing, and scope verification.
 
-Configure a development copy of `wrangler.jsonc`, create your own OAuth KV namespace, and provide secrets through ignored `.dev.vars` or Wrangler secrets. Do not deploy the placeholder configuration. The [operator runbook](docs/operator-setup.md) lists every required setting, the public client setup, release signing, and scope verification. `wrangler.installer.jsonc` builds the separate installer. `npm run build:installer` also performs a dry run.
+Tests: [projects](tests/projects.test.ts), [runtime/OAuth/MCP](tests/runtime.test.ts), [security](tests/security.test.ts), [files](tests/files.test.ts), [releases](tests/releases.test.ts).
 
-## Recovery, troubleshooting, and uninstall
+---
 
-See [recovery and uninstall](docs/recovery.md). Common problems:
-
-- **Conflict:** retrieve the latest project and stage the change against its current revision.
-- **Rewrite warning:** read the candidate and clarify intent before acknowledging the warning. Bytes are never silently repaired.
-- **Unavailable hostname:** choose another name. Unrelated Workers must not be overwritten.
-- **Missing artifact:** export/attach the original ZIP or file again; do not ask the model to recreate it silently.
-- **Authorization/rotation failure:** reconnect Cloudflare in the owner UI. Keep the original encryption key when recovering or updating.
-- **Quota refusal:** export and remove unused projects or manage your shared account resources. The current publication is preserved.
-- **Activated, awaiting reachability:** inspect the operation and retry the public address later; this differs from upload failure.
-
-## Alternatives
-
-| Approach | Advantages | Tradeoffs relative to this project |
-| --- | --- | --- |
-| [Manual static upload](https://developers.cloudflare.com/pages/get-started/direct-upload/) | Simple dashboard upload of already-built files; direct account ownership | Repeat artifact transfer for each edit; no integrated chat project memory |
-| [Git-based deployment](https://developers.cloudflare.com/pages/configuration/git-integration/) | Repository history and automated deployments from commits | Requires a repository and build/deployment setup; preferable when collaboration and review are central |
-| [Hosted AI website builders](https://docs.lovable.dev/features/publish) | Integrated creation, publishing, and hosted product experience | Platform-specific workflow and hosting choices; this project instead focuses on the owner's Cloudflare account and future chat editing |
-| This Publisher | Persistent static artifacts, stable URLs, exact patches, chat editing, undo, and export in your account | One-time setup, shared quotas, static-only scope, and self-hosted maintenance; launch gates remain open |
-
-MIT licensed. [Technical plan](PRD/technical-plan.md) is the implementation reference; the original brainstorm, notes, and independent review remain unchanged historical documents.
+MIT licensed. Built by [Jumper MCP](https://jumpermcp.dev/). The [technical plan](PRD/technical-plan.md) is the implementation reference; the brainstorm, notes and review in `PRD/` are kept as historical documents.
