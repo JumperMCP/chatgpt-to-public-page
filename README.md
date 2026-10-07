@@ -1,94 +1,88 @@
-# Publisher for ChatGPT
+# "Publisher" plugin for ChatGPT
 
-Ask ChatGPT for a web page, get a public address, and come back weeks later in a new chat to change it. The pages live in **your own Cloudflare account**, on the free plan. Made for personal pages and smallish projects that need to be visible right away.
+Ask ChatGPT to create a web page, and receive a public address where it is hosted. Come back weeks later in a new chat to change it. The pages live in **your own Cloudflare account**, on the free plan. **Publisher** is made for personal pages and small projects that need to be visible right away.
 
 You already swapped coding for prompting. Publisher drops the next chore: downloading files, finding a host, and uploading again for every small fix.
 
-**Install:** [chatgpt-to-public.jumpermcp.dev](https://chatgpt-to-public.jumpermcp.dev/) · **Example site:** [pants-math.snlr308.workers.dev](https://pants-math.snlr308.workers.dev/) · **Contents:** [Part 1, for everyone](#part-1-for-everyone) · [How it compares](#how-it-compares) · [Part 2, for technical readers](#part-2-for-technical-readers)
+* **Install:** [chatgpt-to-public.jumpermcp.dev](https://chatgpt-to-public.jumpermcp.dev/) 
+**Example site:** [pants-math.snlr308.workers.dev](https://pants-math.snlr308.workers.dev/) 
+**Contents:** [Part 1, for everyone](#part-1-for-everyone) · [How it compares](#how-it-compares) 
+[Part 2, for technical readers](#part-2-for-technical-readers)
 
 ![From chat to public website: you ask ChatGPT, your Publisher in your Cloudflare account puts the site online, and the Cockpit lets you manage, undo and update.](marketing/pipeline-diagram/pipeline-clean.png)
 
 ---
 
-# Part 1: For everyone
-
-## What it does
+## What Publisher does
 
 You ask ChatGPT: *"Create a website about a new science called Pants Math, with a widget where visitors test pants hypotheses. Publish it on my website."* It writes the site, hands it to your Publisher, and replies with an address like `https://pants-math.<your-name>.workers.dev`.
 
 A month later, in a fresh chat, maybe on your phone: *"Make the pants-math background blue."* ChatGPT finds the site, changes only that, and republishes at the same address. Don't like it? Ask it to undo.
 
-No GitHub, terminal, build step, or OpenAI API key. Depending on your ChatGPT settings, it may ask you to confirm a publish.
+No GitHub, terminal, build step, or OpenAI API key needed.
 
-## Watch it
+## Videos: How to install, How to use
 
-| One-time setup | Everyday use |
+| One-time setup | How to use |
 |:-:|:-:|
 | [![How to install the Publisher plugin](https://img.youtube.com/vi/s7Oz0lrCuuE/hqdefault.jpg)](https://www.youtube.com/watch?v=s7Oz0lrCuuE) | [![Everyday use of the Publisher plugin](https://img.youtube.com/vi/P0WYFshgFnc/hqdefault.jpg)](https://www.youtube.com/watch?v=P0WYFshgFnc) |
-| [How to install](https://www.youtube.com/watch?v=s7Oz0lrCuuE) | [Everyday use](https://www.youtube.com/watch?v=P0WYFshgFnc) |
+| [How to install](https://www.youtube.com/watch?v=s7Oz0lrCuuE) | [How to use](https://www.youtube.com/watch?v=P0WYFshgFnc) |
 
 ## What you need
 
-- A Cloudflare account where you can create Workers and KV namespaces. The free plan is enough. If Cloudflare asks you to verify the account or switch on `workers.dev`, the installer waits until you have.
-- A ChatGPT account, free or paid. Free accounts first switch on **Developer mode** under Settings → Security and login.
-
-Claude Desktop, Cursor and other MCP clients connect the same way; ChatGPT is the one we test against.
+- A Cloudflare account, *free or paid*. The Publisher plugin will create Workers and KV namespaces there on your behalf. The installer guides you.
+- A ChatGPT account, *free or paid*. Free accounts first switch on **Developer mode** under Settings → Security and login.
+- (Claude, Cursor or any other MCP-capable client connects the same way.)
 
 ## Set it up once
 
-1. Open [chatgpt-to-public.jumpermcp.dev](https://chatgpt-to-public.jumpermcp.dev/), choose **Install on my Cloudflare**, sign in to Cloudflare and pick an account. If you're interrupted, it resumes where it stopped.
-2. Open the setup link it shows you and create your password. The link is single-use and expires quickly, so nobody else can claim your Publisher.
-3. In your Publisher's **Cloudflare settings**, add a Cloudflare API token with **Workers Scripts Edit** permission. The page walks you through creating it. Paste it there only, never into ChatGPT.
-4. In ChatGPT, open **Plugins → Add → Custom MCP server** and paste the MCP URL from your Publisher's **ChatGPT connection** panel, including `/mcp` at the end. Sign in and approve access.
+1. Open [chatgpt-to-public.jumpermcp.dev](https://chatgpt-to-public.jumpermcp.dev/), choose **Install on my Cloudflare**, and sign in to Cloudflare. If you're interrupted, the installer resumes where it stopped.
+2. Open the setup link the installer shows you and create your password. The link is single-use and expires quickly, so nobody else can claim your Publisher.
+3. In your Publisher's **Cloudflare settings**, add a Cloudflare API token with **Edit** permission for **Workers Scripts**. The installer walks you through creating it. Paste the Cloudflare API token *only* in the Publisher, never into ChatGPT. This API token connects your Publisher with your Cloudflare. Jumper MCP (from where you started the installer) will not get to know it.
+4. In ChatGPT, open **Plugins → Add → Custom MCP server** and paste the *MCP URL* from your Publisher's **ChatGPT connection** panel, including `/mcp` at the end. Sign in and approve access.
 
 ## Everyday use
 
-Just ask. Name a site, give its project ID, or paste its address in any new chat to edit it; you don't need to find the original conversation. Ask to undo, and the previous version goes back online.
+Prompt away to create new websites. Reference your Publisher plugin to have the result published. To find an oldwebsite, paste its name, project ID, or URL into ChatGPT. It will use Publisher to find the project, without you having to look for the original conversation. Ask to undo, and the previous version goes back online.
 
-Your Publisher's control panel lists every site. From there you can unpublish (the site goes offline, the files stay), export, delete, and choose when to update the Publisher itself.
-
-Two safety nets work in the background. If ChatGPT tries to rewrite far more than you asked for (the classic "rest of the code unchanged"), the Publisher flags it instead of publishing. And two chats editing the same site can't silently overwrite each other.
-
-If you want ChatGPT extra careful on a first publish, add this:
-
-> Publish only the website files I have explicitly selected and reviewed. These files will become public. Preserve their bytes, include the approved images, and stop if you cannot access an artifact. Do not reconstruct missing files or publish unrelated conversation content. Return the public URL and operation status. If this changes an existing project, read its current revision first.
+Your Publisher's control panel lists every site. From there you can unpublish (hide), export, delete, and update the Publisher itself. If ChatGPT tries to rewrite far more or far less than you asked for (the classic "rest of the code unchanged"), the Publisher flags it instead of publishing. Multiple chats editing the same site are also flagged can't silently overwrite each other (use case: project open in phone session as well as desktop session).
 
 ## What it can host
 
-Finished websites: HTML, CSS, JavaScript, images and other small files, loose or as a ZIP, with an `index.html`. React or Vue sites work if you upload the built output.
-
-Not supported: databases, large videos, or teams. Server code is planned. Your own domain works if you attach it to the site in Cloudflare; doing it from the chat is planned. Uploaded files are served, never run.
-
-Limits: 20 sites of up to 100 files and 25 MB each, files up to 10 MB, the last 20 versions of each site kept for undo.
+- Finished websites: HTML, CSS, JavaScript, images and other small files, loose or as a ZIP, with an `index.html`. React or Vue sites work if you upload the built output. (Server code is planned for v2)
+- Not supported: databases, large videos, or teams (multi-user per Publisher). 
+- Hosting on your own domain: works if you tweak your Cloudflare (doing it from the chat is planned for v2). Uploaded files are served, never run (affects source code files).
+- Limits: **20 websites**, 25 MB each, files up to 10 MB (Cloudflare free plan limit is 100 Workers against max 250 MB). The last 20 versions of each website is kept for undo (Publisher limit).
 
 ## Cost and privacy
 
-- Publisher is free and MIT licensed. It never turns on billing or upgrades your Cloudflare plan, but it does share your account's free allowance with whatever else runs there.
-- Your sites and their traffic never pass through Jumper MCP, which only provides the installer. Existing sites keep working even if the installer goes down.
-- Everything you publish is public, and copies can't be recalled. A "noindex" request doesn't make a page private.
-- Your `workers.dev` address may include part of your name or email. Cloudflare lets you change it.
-- Site names, account verification, and Cloudflare's acceptable-use rules are between you and Cloudflare.
+- Publisher is free and MIT licensed. 
+- Publisher cannot read or edit billing details. 
+- Publisher shares your Cloudflare account's allowance with your other stuff that runs there.
+- Your sites and their traffic never pass through Jumper MCP. Jumper MCP only provides the installer. 
+- Existing sites keep working even if the installer goes down.
+- Everything you publish is public.
+- Your `workers.dev` address may include part of your name or email. This is controlled in your Cloudflare.
+- Cloudflare's acceptable-use rules will apply to your site names, account verification, content etc.
 
 ## When something goes wrong
 
-- **Name taken:** ChatGPT asks you for another name. The Publisher never overwrites a site it didn't create.
+- **Name already taken by a previous project:** ChatGPT asks you for another name.
 - **ChatGPT can't find your file:** attach it again rather than letting it recreate the file from memory.
-- **Published but not loading yet:** try again in a few minutes; the upload itself succeeded.
-- **Out of space:** export and delete old sites. Live sites are never removed to make room.
-- **Publishing says the token is missing:** add it in your Publisher's Cloudflare settings (step 3).
+- **Published but not loading yet:** try again in a few minutes; the upload itself probably succeeded.
+- **Out of space:** You export and delete old sites. Live sites are never removed to make room.
+- **Publishing says the token is missing:** grab a "Worker Scripts" API token from Cloudflare, add it in your Publisher settings (step 3).
 
-Everything else, including uninstalling: [recovery and uninstall](docs/recovery.md).
+Also see: [recovery and uninstall](docs/recovery.md).
 
 ---
-
-## How it compares
-
-No option wins everywhere, and for some needs another one is the better pick. Checked October 2026; competitors change quickly, so check their docs.
 
 ![Comparison of Publisher with WebsitePublisher.ai, ChatGPT canvas, Claude artifacts, Netlify Drop, Cloudflare upload, Git-based hosting, AI app builders and the Netlify MCP server across eight criteria. The same data follows as a text table.](marketing/comparison/comparison.png)
 
 <details>
-<summary>The same comparison as a text table, with links</summary>
+<summary>Above comparison in text format, with links: ...</summary>
+
+## How it compares
 
 <sub>✅ yes · 🟡 partly, or with conditions · 🔜 planned · ❌ no</sub>
 
@@ -110,17 +104,13 @@ No option wins everywhere, and for some needs another one is the better pick. Ch
 
 </details>
 
-**Pick something else** for a quick throwaway link (canvas or Claude artifact, zero setup), for logins or a database (WebsitePublisher.ai or an AI app builder), for team review and full history (Git), or for rare edits you don't mind dragging into a browser (Netlify Drop, Cloudflare upload).
-
-**Pick Publisher** if you work in ChatGPT and want a stable address in an account you control, editable from any future chat.
-
 ---
 
-# Part 2: For technical readers
+# Details
 
 ## Verification
 
-Current release: 0.1.12, signed and served from the installer domain ([release notes](docs/release-notes.md)). An independent tester on a separate Cloudflare account completed installation, owner setup, ChatGPT connection, publishing, and discovery plus editing from an unrelated smartphone session, and updated through several releases. Not yet measured: file and generated-image transfer from ChatGPT attachments, Cloudflare OAuth refresh (hence the API token in setup step 3), and free-plan CPU and memory under the maximum limits. Details: [acceptance ledger](docs/acceptance.md). To run your own installer: [operator runbook](docs/operator-setup.md).
+Current release 0.1.12 was signed and served from the installer domain ([release notes](docs/release-notes.md)). An independent tester on a separate Cloudflare account completed installation, owner setup, ChatGPT connection, publishing, and discovery plus editing from an unrelated smartphone session, and updated through several releases. Not yet measured: file and generated-image transfer from ChatGPT attachments, Cloudflare OAuth refresh (hence the API token in setup step 3), and free-plan CPU and memory under the maximum limits. Details: [acceptance ledger](docs/acceptance.md). To run your own installer: [operator runbook](docs/operator-setup.md).
 
 ## Architecture
 
@@ -137,7 +127,7 @@ flowchart LR
   Visitors --> Site
 ```
 
-Snapshots live in a SQLite-backed Durable Object; KV holds only OAuth records. Each site is a separate assets-only Worker without Publisher credentials or bindings. Content and visitor traffic never pass through the installer, and ordinary publishing doesn't call it. Revoking the Cloudflare OAuth app is different from installer downtime and can require reconnecting.
+Snapshots save to SQLite-backed Durable Object. KV holds only OAuth records. Each site is a separate assets-only Worker without Publisher credentials or bindings. Content and visitor traffic do not pass through the installer. Ordinary publishing does not call it. Revoking the Cloudflare OAuth app is different from installer downtime and can require reconnecting.
 
 ## Limits and serving rules
 
@@ -151,7 +141,7 @@ Snapshots live in a SQLite-backed Durable Object; KV holds only OAuth records. E
 | Inline text per file / MCP request body | 256 KiB / 1 MiB |
 | Text response | 16,000 characters, with continuation |
 
-Static routing by default; `404.html` enables 404 behavior; SPA fallback must be explicit. `_headers` (relative paths) and `_redirects` (up to 100 relative-source rules) are validated and passed as direct-upload config, and kept in snapshots and exports. Unsupported syntax and `.assetsignore` are rejected.
+Static routing by default. `404.html` enables 404 behavior. SPA fallback must be explicit. `_headers` (relative paths) and `_redirects` (up to 100 relative-source rules) are validated and passed as direct-upload config, and kept in snapshots and exports. Unsupported syntax and `.assetsignore` are rejected.
 
 ## Security model
 
@@ -191,6 +181,8 @@ Runtime tests need local workerd and loopback sockets. On NixOS set `MINIFLARE_W
 
 Tests: [projects](tests/projects.test.ts), [runtime/OAuth/MCP](tests/runtime.test.ts), [security](tests/security.test.ts), [files](tests/files.test.ts), [releases](tests/releases.test.ts).
 
+Take a peek at QUIRKS.md (running log of unexpected isses).
+
 ---
 
-MIT licensed. Built by [Jumper MCP](https://jumpermcp.dev/). The [technical plan](PRD/technical-plan.md) is the implementation reference; the brainstorm, notes and review in `PRD/` are kept as historical documents.
+Built by [Jumper MCP](https://jumpermcp.dev/)
