@@ -66,10 +66,11 @@ Your Publisher's control panel lists every site. From there you can unpublish (h
 ## Troubleshooting
 
 - **Name already taken by a previous project:** ChatGPT asks you for another name.
-- **ChatGPT can't find your file:** attach it again rather than letting it recreate the file from memory.
-- **Published but not loading yet:** try again in a few minutes; the upload itself probably succeeded.
+- **ChatGPT can't find your file:** Attach it again rather than letting it recreate the file from memory.
+- **Published but not loading yet:** Try again in a few minutes; the upload itself probably succeeded.
 - **Out of space:** You export and delete old sites. Live sites are never removed to make room.
-- **Publishing says the token is missing:** grab a "Worker Scripts" API token from Cloudflare, add it in your Publisher settings (step 3).
+- **Publishing event claims token is missing:** Grab a "Worker Scripts" API token from Cloudflare, add it in your Publisher settings (step 3).
+- **I'm using Claude, Hermes etc:** Everything above applies just the same, including the install via [chatgpt-to-public.jumpermcp.dev](https://chatgpt-to-public.jumpermcp.dev/)
 
 Also see: [recovery and uninstall](docs/recovery.md).
 
