@@ -1,4 +1,4 @@
-# "Publisher" plugin for ChatGPT
+# Publisher plugin for ChatGPT
 
 Ask ChatGPT to create a web page, and receive a public address where it is hosted. Come back weeks later in a new chat to change it. The pages live in **your own Cloudflare account**, on the free plan. **Publisher** is made for personal pages and small projects that need to be visible right away.
 
