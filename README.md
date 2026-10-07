@@ -71,8 +71,7 @@ Your Publisher's control panel lists every site. From there you can unpublish (h
 - **Out of space:** You export and delete old sites. Live sites are never removed to make room.
 - **Publishing event claims token is missing:** Grab a "Worker Scripts" API token from Cloudflare, add it in your Publisher settings (step 3).
 - **Using Claude, Hermes etc:** Everything above applies, including install via [chatgpt-to-public.jumpermcp.dev](https://chatgpt-to-public.jumpermcp.dev/)
-
-Also see: [recovery and uninstall](docs/recovery.md).
+- Also see: [recovery and uninstall](docs/recovery.md).
 
 ---
 
