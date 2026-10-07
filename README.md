@@ -28,8 +28,8 @@ No GitHub, terminal, build step, or OpenAI API key needed.
 
 ## What you need
 
-- A Cloudflare account, *free or paid*. The Publisher plugin will create Workers and KV namespaces there on your behalf.
-- A ChatGPT account, *free or paid*. Free accounts first switch on **Developer mode** under Settings → Security and login.
+- Cloudflare account, *free or paid*. The Publisher plugin creates Workers and KVs there on your behalf.
+- ChatGPT account, *free or paid*. Free accounts first switch on **developer mode** (Settings → Security & login).
 - (Claude, Cursor or any other MCP-capable client connects the same way.)
 
 ## How to install (once)
@@ -63,7 +63,7 @@ Your Publisher's control panel lists every site. From there you can unpublish (h
 - Your `workers.dev` address may include part of your name or email. This is controlled in your Cloudflare.
 - Cloudflare's acceptable-use rules will apply to your site names, account verification, content etc.
 
-## When something goes wrong
+## Troubleshooting
 
 - **Name already taken by a previous project:** ChatGPT asks you for another name.
 - **ChatGPT can't find your file:** attach it again rather than letting it recreate the file from memory.
@@ -179,7 +179,7 @@ Runtime tests need local workerd and loopback sockets. On NixOS set `MINIFLARE_W
 
 Tests: [projects](tests/projects.test.ts), [runtime/OAuth/MCP](tests/runtime.test.ts), [security](tests/security.test.ts), [files](tests/files.test.ts), [releases](tests/releases.test.ts).
 
-Take a peek at QUIRKS.md (running log of unexpected isses).
+Take a peek at QUIRKS.md (running log of unexpected issues).
 
 ---
 
