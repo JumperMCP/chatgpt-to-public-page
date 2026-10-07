@@ -4,10 +4,8 @@ Ask ChatGPT to create a web page, and receive a public address where it is hoste
 
 You already swapped coding for prompting. Publisher drops the next chore: downloading files, finding a host, and uploading again for every small fix.
 
-* **Install:** [chatgpt-to-public.jumpermcp.dev](https://chatgpt-to-public.jumpermcp.dev/) 
-**Example site:** [pants-math.snlr308.workers.dev](https://pants-math.snlr308.workers.dev/) 
-**Contents:** [Part 1, for everyone](#part-1-for-everyone) · [How it compares](#how-it-compares) 
-[Part 2, for technical readers](#part-2-for-technical-readers)
+* **Install now:** [chatgpt-to-public.jumpermcp.dev](https://chatgpt-to-public.jumpermcp.dev/) 
+* **Example site:** [pants-math.snlr308.workers.dev](https://pants-math.snlr308.workers.dev/) (made by Astra 6, hosted by Cloudflare)
 
 ![From chat to public website: you ask ChatGPT, your Publisher in your Cloudflare account puts the site online, and the Cockpit lets you manage, undo and update.](marketing/pipeline-diagram/pipeline-clean.png)
 
@@ -15,13 +13,13 @@ You already swapped coding for prompting. Publisher drops the next chore: downlo
 
 ## What Publisher does
 
-You ask ChatGPT: *"Create a website about a new science called Pants Math, with a widget where visitors test pants hypotheses. Publish it on my website."* It writes the site, hands it to your Publisher, and replies with an address like `https://pants-math.<your-name>.workers.dev`.
+You ask ChatGPT: *"Create a website about a new science called Pants Math, with a widget where visitors test pants hypotheses, and publish it."* ChatGPT creates the website, hands it to your Publisher, and replies to you with an address like `https://pants-math.<your-name>.workers.dev`
 
-A month later, in a fresh chat, maybe on your phone: *"Make the pants-math background blue."* ChatGPT finds the site, changes only that, and republishes at the same address. Don't like it? Ask it to undo.
+A month later, in a fresh chat, maybe on your phone: *"Make the pants-math background blue."* ChatGPT finds the site, changes only the background, and republishes at the same address. Don't like the background after all? Ask it to undo.
 
 No GitHub, terminal, build step, or OpenAI API key needed.
 
-## Videos: How to install, How to use
+## Videos
 
 | One-time setup | How to use |
 |:-:|:-:|
@@ -30,18 +28,18 @@ No GitHub, terminal, build step, or OpenAI API key needed.
 
 ## What you need
 
-- A Cloudflare account, *free or paid*. The Publisher plugin will create Workers and KV namespaces there on your behalf. The installer guides you.
+- A Cloudflare account, *free or paid*. The Publisher plugin will create Workers and KV namespaces there on your behalf.
 - A ChatGPT account, *free or paid*. Free accounts first switch on **Developer mode** under Settings → Security and login.
 - (Claude, Cursor or any other MCP-capable client connects the same way.)
 
-## Set it up once
+## How to install (once)
 
 1. Open [chatgpt-to-public.jumpermcp.dev](https://chatgpt-to-public.jumpermcp.dev/), choose **Install on my Cloudflare**, and sign in to Cloudflare. If you're interrupted, the installer resumes where it stopped.
 2. Open the setup link the installer shows you and create your password. The link is single-use and expires quickly, so nobody else can claim your Publisher.
 3. In your Publisher's **Cloudflare settings**, add a Cloudflare API token with **Edit** permission for **Workers Scripts**. The installer walks you through creating it. Paste the Cloudflare API token *only* in the Publisher, never into ChatGPT. This API token connects your Publisher with your Cloudflare. Jumper MCP (from where you started the installer) will not get to know it.
 4. In ChatGPT, open **Plugins → Add → Custom MCP server** and paste the *MCP URL* from your Publisher's **ChatGPT connection** panel, including `/mcp` at the end. Sign in and approve access.
 
-## Everyday use
+## How to use (daily)
 
 Prompt away to create new websites. Reference your Publisher plugin to have the result published. To find an oldwebsite, paste its name, project ID, or URL into ChatGPT. It will use Publisher to find the project, without you having to look for the original conversation. Ask to undo, and the previous version goes back online.
 
