@@ -29,7 +29,7 @@ No GitHub, terminal, build step, or OpenAI API key needed.
 ## What you need
 
 - Cloudflare account, *free or paid*. The Publisher plugin creates Workers and KVs there on your behalf.
-- ChatGPT account, *free or paid*. Free accounts first switch on **developer mode** (Settings → Security & login).
+- ChatGPT account, *free or paid*. Free accounts first enable "developer mode" (Settings → Security & login).
 - (Claude, Cursor or any other MCP-capable client connects the same way.)
 
 ## How to install (once)
