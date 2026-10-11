@@ -21,10 +21,18 @@ No GitHub, terminal, build step, or OpenAI API key needed.
 
 ## Videos
 
-| One-time setup | How to use |
+| [How to install (one-time)](https://www.youtube.com/watch?v=s7Oz0lrCuuE) | [How to use](https://www.youtube.com/watch?v=P0WYFshgFnc) |
 |:-:|:-:|
 | [![How to install the Publisher plugin](https://img.youtube.com/vi/s7Oz0lrCuuE/hqdefault.jpg)](https://www.youtube.com/watch?v=s7Oz0lrCuuE) | [![Everyday use of the Publisher plugin](https://img.youtube.com/vi/P0WYFshgFnc/hqdefault.jpg)](https://www.youtube.com/watch?v=P0WYFshgFnc) |
-| [How to install](https://www.youtube.com/watch?v=s7Oz0lrCuuE) | [How to use](https://www.youtube.com/watch?v=P0WYFshgFnc) |
+
+<table>
+<tr>
+<td><img src="marketing/screenshots/Punlisher-install-page.png" width="123px" alt="Publisher install page" /></td>
+<td><img src="marketing/screenshots/Punlisher-cockpit.png" width="123px" alt="Publisher Cockpit" /></td>
+<td><img src="marketing/screenshots/01_workflow_API-token-not-set-yet.png" width="123px" alt="API token not set yet - error" /></td>
+<td><img src="marketing/screenshots/02_workflow_API-token-has-been-set-work-continues.png" width="123px" alt="Working with Publisher in ChatGPT" /></td>
+</tr>
+</table>
 
 ## What you need
 
@@ -75,7 +83,7 @@ Your Publisher's control panel lists every site. From there you can unpublish (h
 
 ---
 
-![Comparison of Publisher with WebsitePublisher.ai, ChatGPT canvas, Claude artifacts, Netlify Drop, Cloudflare upload, Git-based hosting, AI app builders and the Netlify MCP server across eight criteria. The same data follows as a text table.](marketing/comparison/comparison.png)
+![Comparison of Publisher with WebsitePublisher.ai, ChatGPT Sites, Claude artifacts, Netlify Drop, Cloudflare upload, Git-based hosting, AI app builders and the Netlify MCP server across eight criteria. The same data follows as a text table.](marketing/comparison/comparison.png)
 
 <details>
 <summary>Above comparison in text format, with links: ...</summary>
@@ -88,7 +96,7 @@ Your Publisher's control panel lists every site. From there you can unpublish (h
 |---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
 | **[Publisher](https://chatgpt-to-public.jumpermcp.dev/)** (this project) | ✅ ChatGPT + MCP | ✅ Cloudflare | 🟡 one-time install | ✅ | ✅ last 20 | 🟡 manual today ¹ | 🔜 planned ² | ❌ |
 | **[WebsitePublisher.ai](https://www.websitepublisher.ai/)** (hosted AI publisher) | ✅ many AI chats | ❌ their platform | ✅ sign in | ✅ | ✅ count by plan | 🟡 paid plans | 🟡 built-in only | ✅ |
-| **[ChatGPT canvas](https://help.openai.com/en/articles/9930697-what-is-canvas)** (share link) | ✅ ChatGPT only | ❌ chatgpt.com | ✅ none | 🟡 original chat | 🟡 | ❌ | ❌ | ❌ |
+| **[ChatGPT Sites](https://help.openai.com/en/articles/20001339-creating-and-using-chatgpt-sites)** (paid plans, private or public) | ✅ ChatGPT only ⁴ | ❌ OpenAI | ✅ none | ✅ | ✅ saved versions | ✅ | 🟡 JS/TS only | ✅ |
 | **[Claude artifact](https://support.claude.com/en/articles/9547008-publish-and-share-artifacts)** (published link) | ✅ Claude only | ❌ claude.ai | ✅ none | 🟡 original chat | 🟡 | ❌ | 🟡 AI calls only | 🟡 paid plans, 20 MB |
 | **[Netlify Drop](https://app.netlify.com/drop)** (drag and drop) | ❌ manual | ✅ once claimed ³ | ✅ none | ❌ re-upload | ✅ | ✅ | 🟡 not via Drop | 🟡 not via Drop |
 | **[Cloudflare upload](https://developers.cloudflare.com/pages/get-started/direct-upload/)** (dashboard direct upload) | ❌ manual | ✅ Cloudflare | ✅ dashboard | ❌ re-upload | ✅ | ✅ | 🟡 not via upload | 🟡 not via upload |
@@ -99,6 +107,7 @@ Your Publisher's control panel lists every site. From there you can unpublish (h
 <sub>¹ Attach a domain to the site's Worker in Cloudflare (Settings → Domains & Routes); the domain must be on Cloudflare. Doing this from the chat is planned.</sub><br>
 <sub>² Sites are static today. Server code needs a chosen runtime, so it was left out of v1 and is planned. No database support.</sub><br>
 <sub>³ Unclaimed Netlify Drop sites are deleted within an hour.</sub><br>
+<sub>⁴ Workspace admins on Business and Enterprise can restrict publishing; Enterprise turns public publishing off by default.</sub><br>
 
 </details>
 

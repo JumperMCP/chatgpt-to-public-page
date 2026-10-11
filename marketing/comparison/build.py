@@ -29,9 +29,9 @@ ROWS = [
     ("WebsitePublisher.ai", "hosted AI publisher", "https://www.websitepublisher.ai/", [
         ("Y", "many AI chats"), ("N", "their platform"), ("Y", "sign in"), ("Y", ""),
         ("Y", "count by plan"), ("P", "paid plans"), ("P", "built-in only"), ("Y", "")]),
-    ("ChatGPT canvas", "share link", "https://help.openai.com/en/articles/9930697-what-is-canvas", [
-        ("Y", "ChatGPT only"), ("N", "chatgpt.com"), ("Y", "none"), ("P", "original chat"),
-        ("P", ""), ("N", ""), ("N", ""), ("N", "")]),
+    ("ChatGPT Sites", "paid plans, private or public", "https://help.openai.com/en/articles/20001339-creating-and-using-chatgpt-sites", [
+        ("Y", "ChatGPT only ⁴"), ("N", "OpenAI"), ("Y", "none"), ("Y", ""),
+        ("Y", "saved versions"), ("Y", ""), ("P", "JS/TS only"), ("Y", "")]),
     ("Claude artifact", "published link", "https://support.claude.com/en/articles/9547008-publish-and-share-artifacts", [
         ("Y", "Claude only"), ("N", "claude.ai"), ("Y", "none"), ("P", "original chat"),
         ("P", ""), ("N", ""), ("P", "AI calls only"), ("P", "paid plans, 20 MB")]),
@@ -56,6 +56,7 @@ NOTES = [
     "¹ Attach a domain to the site's Worker in Cloudflare (Settings → Domains & Routes); the domain must be on Cloudflare. Doing this from the chat is planned.",
     "² Sites are static today. Server code needs a chosen runtime, so it was left out of v1 and is planned. No database support.",
     "³ Unclaimed Netlify Drop sites are deleted within an hour.",
+    "⁴ Workspace admins on Business and Enterprise can restrict publishing; Enterprise turns public publishing off by default.",
 ]
 
 LEGEND = {"Y": "Yes", "P": "Partly, or with conditions", "L": "Planned", "N": "No"}
@@ -137,7 +138,7 @@ def build_html(narrow=False):
 
 
 def caption(cap, narrow):
-    return "".join(re.findall(r"[¹²³]", cap)) if narrow else cap
+    return "".join(re.findall(r"[¹²³⁴]", cap)) if narrow else cap
 
 
 def render(stem, size):
@@ -161,6 +162,6 @@ if __name__ == "__main__":
     (HERE / "comparison.html").write_text(build_html())
     (HERE / "comparison-narrow.html").write_text(build_html(narrow=True))
     (HERE / "comparison.md").write_text(build_markdown() + "\n")
-    render("comparison", "1600,1170")
-    render("comparison-narrow", "1000,1040")
+    render("comparison", "1600,1195")
+    render("comparison-narrow", "1000,1068")
     print("wrote comparison.{html,md,png} and comparison-narrow.{html,png}")
