@@ -25,12 +25,15 @@ No GitHub, terminal, build step, or OpenAI API key needed.
 |:-:|:-:|
 | [![How to install the Publisher plugin](https://img.youtube.com/vi/s7Oz0lrCuuE/hqdefault.jpg)](https://www.youtube.com/watch?v=s7Oz0lrCuuE) | [![Everyday use of the Publisher plugin](https://img.youtube.com/vi/P0WYFshgFnc/hqdefault.jpg)](https://www.youtube.com/watch?v=P0WYFshgFnc) |
 
+
+## Screenshots
+
 <table>
 <tr>
-<td><img src="marketing/screenshots/Punlisher-install-page.png" width="123px" alt="Publisher install page" /></td>
-<td><img src="marketing/screenshots/Punlisher-cockpit.png" width="123px" alt="Publisher Cockpit" /></td>
-<td><img src="marketing/screenshots/01_workflow_API-token-not-set-yet.png" width="123px" alt="API token not set yet - error" /></td>
-<td><img src="marketing/screenshots/02_workflow_API-token-has-been-set-work-continues.png" width="123px" alt="Working with Publisher in ChatGPT" /></td>
+<td><img src="marketing/screenshots/Punlisher-install-page.png" width="166px" alt="Publisher install page" /></td>
+<td><img src="marketing/screenshots/Punlisher-cockpit.png" width="166px" alt="Publisher Cockpit" /></td>
+<td><img src="marketing/screenshots/01_workflow_API-token-not-set-yet.png" width="166px" alt="API token not set yet - error" /></td>
+<td><img src="marketing/screenshots/02_workflow_API-token-has-been-set-work-continues.png" width="166px" alt="Working with Publisher in ChatGPT" /></td>
 </tr>
 </table>
 
