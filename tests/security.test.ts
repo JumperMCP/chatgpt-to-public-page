@@ -86,35 +86,59 @@ test("untrusted sibling origins, missing CSRF and cookie tossing are rejected", 
   );
   assert.doesNotMatch(sessionCookie("a"), /Domain/);
 });
-test("callback registration fails closed and accepts only exact configured destinations", () => {
-  const allowed = ["https://chatgpt.example/callback"];
-  assert.equal(
-    registrationAllowed(
-      { redirect_uris: allowed, token_endpoint_auth_method: "none" },
-      allowed,
-    ),
-    true,
-  );
+test("callback registration fails closed; loopback destinations only when enabled", () => {
+  const allowed = ["https://chatgpt.example/callback"],
+    publicClient = (uri: string) => ({
+      redirect_uris: [uri],
+      token_endpoint_auth_method: "none",
+    });
+  for (const loopback of [false, true])
+    assert.equal(
+      registrationAllowed(publicClient(allowed[0]), allowed, loopback),
+      true,
+    );
   for (const redirect of [
     "https://chatgpt.example/callback/extra",
     "https://attacker.example/callback",
     "https://chatgpt.example/callback?next=attacker",
+    "https://localhost:8080/callback",
+    "http://localhost.attacker.example/callback",
+    "http://127.0.0.1.attacker.example/callback",
+    "http://user@localhost:8080/callback",
+    "http://localhost:8080/callback?next=attacker",
+    "http://localhost:8080/callback#fragment",
+    "http://LOCALHOST:8080/callback",
+    "http://10.0.0.1:8080/callback",
+    "not a url",
   ])
     assert.equal(
+      registrationAllowed(publicClient(redirect), allowed, true),
+      false,
+    );
+  for (const loopback of [
+    "http://localhost:53682/callback",
+    "http://127.0.0.1:53682/callback",
+    "http://[::1]:53682/callback",
+  ]) {
+    assert.equal(registrationAllowed(publicClient(loopback), [], false), false);
+    assert.equal(registrationAllowed(publicClient(loopback), [], true), true);
+    assert.equal(
       registrationAllowed(
-        { redirect_uris: [redirect], token_endpoint_auth_method: "none" },
-        allowed,
+        {
+          redirect_uris: [loopback],
+          token_endpoint_auth_method: "client_secret_post",
+        },
+        [],
+        true,
       ),
       false,
     );
-  assert.equal(registrationAllowed({ redirect_uris: allowed }, allowed), false);
+  }
   assert.equal(
-    registrationAllowed(
-      { redirect_uris: allowed, token_endpoint_auth_method: "none" },
-      [],
-    ),
+    registrationAllowed({ redirect_uris: allowed }, allowed, true),
     false,
   );
+  assert.equal(registrationAllowed(publicClient(allowed[0]), [], true), false);
 });
 test("credential encryption survives reload; rotation is serialized and interruption forces reconnect", async () => {
   const store = new TestStore(),

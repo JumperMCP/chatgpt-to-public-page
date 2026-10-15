@@ -28,7 +28,8 @@ import {
 } from "./types";
 import { readBounded } from "./files";
 import { handleMcp } from "./mcp";
-import { SCOPES, callbacks, oauthHelpers } from "./oauth";
+import { SCOPES, callbacks, loopbackEnabled, oauthHelpers } from "./oauth";
+import { callbackAllowed, loopbackCallback } from "./oauth-policy";
 import { escapeHtml as e, form, hidden, page } from "./ui";
 
 export class Publisher extends DurableObject<Env> {
@@ -295,7 +296,7 @@ export class Publisher extends DurableObject<Env> {
     } catch (error) {
       if (request.method === "GET" && path === "/authorize")
         return page(
-          "Sign in to connect ChatGPT",
+          "Sign in to connect your AI client",
           ownerLogin(url.pathname + url.search),
         );
       if (request.method === "GET" && path === "/")
@@ -307,7 +308,11 @@ export class Publisher extends DurableObject<Env> {
       if (request.method === "GET") {
         const auth = await oauth.parseAuthRequest(request);
         requireThat(
-          callbacks(this.env).includes(auth.redirectUri) &&
+          callbackAllowed(
+            auth.redirectUri,
+            callbacks(this.env),
+            loopbackEnabled(this.env),
+          ) &&
             auth.codeChallengeMethod === "S256" &&
             auth.codeChallenge &&
             auth.state &&
@@ -319,8 +324,8 @@ export class Publisher extends DurableObject<Env> {
         const details = await oauth.describeConsent(auth),
           consent = await oauth.beginConsent(auth);
         return page(
-          "Connect ChatGPT",
-          `<p>Allow <strong>${e(details.clientName)}</strong> to read your projects and publish selected files? The registered client name is self-reported. Continue only if you started this connection in ChatGPT.</p><p>Callback: <code>${e(auth.redirectUri)}</code></p>${form("/authorize", session.csrf, hidden("handle", consent.handle) + `<p>Access: ${e(SCOPES.join(", "))}. Published files become public.</p><button name="decision" value="approve">Allow project access</button> <button name="decision" value="deny">Deny</button>`)}`,
+          "Connect your AI client",
+          `<p>Allow <strong>${e(details.clientName)}</strong> to read your projects and publish selected files? The registered client name is self-reported. Continue only if you just started this connection yourself, in ChatGPT or another AI client.</p><p>Callback: <code>${e(auth.redirectUri)}</code></p>${loopbackCallback(auth.redirectUri) ? `<p class="warning"><strong>This sign-in returns to a program on the computer you are using now</strong>, not to a website. Any program on this computer can open this page. Approve only if you started this sign-in yourself a moment ago.</p>` : ""}${form("/authorize", session.csrf, hidden("handle", consent.handle) + `<p>Access: ${e(SCOPES.join(", "))}. Published files become public.</p><button name="decision" value="approve">Allow project access</button> <button name="decision" value="deny">Deny</button>`)}`,
           200,
           consent.headers,
           auth.redirectUri,
@@ -351,7 +356,11 @@ export class Publisher extends DurableObject<Env> {
         { scope: SCOPES },
       );
       requireThat(
-        callbacks(this.env).includes(approved.request.redirectUri),
+        callbackAllowed(
+          approved.request.redirectUri,
+          callbacks(this.env),
+          loopbackEnabled(this.env),
+        ),
         "invalid_authorization",
         "Callback no longer allowed.",
         403,

@@ -3,8 +3,8 @@ import assert from "node:assert/strict";
 import { Miniflare, convertV4MiniflareOptions } from "miniflare";
 import { sha256 } from "../src/types";
 const origin = "https://publisher.test";
-test("real Worker + SQLite DO: setup, owner UI, sibling isolation, protected MCP and OAuth registration", async () => {
-  const mf = new Miniflare(
+async function start(extra: Record<string, string> = {}) {
+  return new Miniflare(
     convertV4MiniflareOptions({
       modules: true,
       scriptPath: "dist/worker.js",
@@ -25,9 +25,18 @@ test("real Worker + SQLite DO: setup, owner UI, sibling isolation, protected MCP
         CREDENTIAL_KEY: "11".repeat(32),
         SETUP_TOKEN_HASH: await sha256("setup-token"),
         SETUP_EXPIRES_AT: String(Date.now() + 60000),
+        ...extra,
       },
     }),
   );
+}
+async function challengeFor(verifier: string) {
+  return Buffer.from(
+    await crypto.subtle.digest("SHA-256", new TextEncoder().encode(verifier)),
+  ).toString("base64url");
+}
+test("real Worker + SQLite DO: setup, owner UI, sibling isolation, protected MCP and OAuth registration", async () => {
+  const mf = await start();
   try {
     const call = (
       path: string,
@@ -101,6 +110,17 @@ test("real Worker + SQLite DO: setup, owner UI, sibling isolation, protected MCP
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
+        client_name: "local client",
+        redirect_uris: ["http://localhost:53682/callback"],
+        token_endpoint_auth_method: "none",
+      }),
+    });
+    assert.equal(r.status, 400);
+    assert.match(await r.text(), /ALLOW_LOOPBACK_CALLBACKS/);
+    r = await call("/oauth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
         client_name: "Test ChatGPT",
         redirect_uris: ["https://chatgpt.example/callback"],
         token_endpoint_auth_method: "none",
@@ -111,12 +131,7 @@ test("real Worker + SQLite DO: setup, owner UI, sibling isolation, protected MCP
     assert.equal(r.status, 201);
     const client = (await r.json()) as { client_id: string };
     const verifier = "a".repeat(43),
-      challenge = Buffer.from(
-        await crypto.subtle.digest(
-          "SHA-256",
-          new TextEncoder().encode(verifier),
-        ),
-      ).toString("base64url");
+      challenge = await challengeFor(verifier);
     const authQuery = new URLSearchParams({
       client_id: client.client_id,
       redirect_uri: "https://chatgpt.example/callback",
@@ -202,7 +217,8 @@ test("real Worker + SQLite DO: setup, owner UI, sibling isolation, protected MCP
     r = await call("/authorize?" + authQuery, { headers: { Cookie: cookie } });
     assert.equal(r.status, 200);
     const consentHtml = await r.text();
-    assert.match(consentHtml, /Connect ChatGPT/);
+    assert.match(consentHtml, /Connect your AI client/);
+    assert.doesNotMatch(consentHtml, /class="warning"/);
     const handle = consentHtml.match(/name="handle" value="([^"]+)"/)![1],
       consentCookie = r.headers.get("set-cookie")!.split(";")[0];
     r = await call("/authorize", {
@@ -289,6 +305,93 @@ test("real Worker + SQLite DO: setup, owner UI, sibling isolation, protected MCP
       }),
     });
     assert.equal(r.status, 403);
+  } finally {
+    await mf.dispose();
+  }
+});
+test("loopback callbacks: opt-in registration, consent warning and code exchange", async () => {
+  const mf = await start({ ALLOW_LOOPBACK_CALLBACKS: "true" }),
+    callback = "http://127.0.0.1:53682/callback";
+  try {
+    const call = (
+      path: string,
+      init: NonNullable<Parameters<Miniflare["dispatchFetch"]>[1]> = {},
+    ) => mf.dispatchFetch(origin + path, { ...init, redirect: "manual" });
+    let r = await call("/setup", {
+      method: "POST",
+      headers: {
+        Origin: origin,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({
+        token: "setup-token",
+        password: "a secure owner password",
+      }),
+    });
+    assert.equal(r.status, 303);
+    const cookie = r.headers.get("set-cookie")!.split(";")[0];
+    r = await call("/", { headers: { Cookie: cookie } });
+    const csrf = (await r.text()).match(/name="csrf" value="([^"]+)"/)![1];
+    r = await call("/oauth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        client_name: "Local client",
+        redirect_uris: [callback],
+        token_endpoint_auth_method: "none",
+        grant_types: ["authorization_code", "refresh_token"],
+        response_types: ["code"],
+      }),
+    });
+    assert.equal(r.status, 201);
+    const client = (await r.json()) as { client_id: string },
+      verifier = "b".repeat(43);
+    const authQuery = new URLSearchParams({
+      client_id: client.client_id,
+      redirect_uri: callback,
+      response_type: "code",
+      resource: origin + "/mcp",
+      scope: "projects:read projects:write",
+      state: "some-state",
+      code_challenge: await challengeFor(verifier),
+      code_challenge_method: "S256",
+    });
+    r = await call("/authorize?" + authQuery, { headers: { Cookie: cookie } });
+    assert.equal(r.status, 200);
+    assert.match(
+      r.headers.get("content-security-policy")!,
+      /form-action 'self' http:\/\/127\.0\.0\.1:53682;/,
+    );
+    const consentHtml = await r.text();
+    assert.match(consentHtml, /class="warning"/);
+    assert.match(consentHtml, /a program on the computer you are using now/);
+    const handle = consentHtml.match(/name="handle" value="([^"]+)"/)![1],
+      consentCookie = r.headers.get("set-cookie")!.split(";")[0];
+    r = await call("/authorize", {
+      method: "POST",
+      headers: {
+        Origin: origin,
+        Cookie: cookie + "; " + consentCookie,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({ csrf, handle, decision: "approve" }),
+    });
+    assert.equal(r.status, 302);
+    const location = new URL(r.headers.get("Location")!);
+    assert.equal(location.origin + location.pathname, callback);
+    r = await call("/oauth/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        grant_type: "authorization_code",
+        client_id: client.client_id,
+        code: location.searchParams.get("code")!,
+        code_verifier: verifier,
+        redirect_uri: callback,
+        resource: origin + "/mcp",
+      }),
+    });
+    assert.equal(r.status, 200);
   } finally {
     await mf.dispose();
   }

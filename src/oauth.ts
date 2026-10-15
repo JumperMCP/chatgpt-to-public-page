@@ -1,4 +1,4 @@
-import { registrationAllowed } from "./oauth-policy";
+import { loopbackCallback, registrationAllowed } from "./oauth-policy";
 import {
   OAuthProvider,
   getOAuthApi,
@@ -13,6 +13,29 @@ export function callbacks(env: Env): string[] {
         (s): s is string => typeof s === "string" && s.startsWith("https://"),
       )
     : [];
+}
+// Off unless the owner sets ALLOW_LOOPBACK_CALLBACKS=true on the Publisher Worker.
+export function loopbackEnabled(env: Env) {
+  return env.ALLOW_LOOPBACK_CALLBACKS === "true";
+}
+
+function registrationError(metadata: Record<string, unknown>, env: Env) {
+  if (registrationAllowed(metadata, callbacks(env), loopbackEnabled(env)))
+    return undefined;
+  const uris = metadata.redirect_uris;
+  if (
+    !loopbackEnabled(env) &&
+    Array.isArray(uris) &&
+    uris.some((uri) => typeof uri === "string" && loopbackCallback(uri))
+  )
+    return {
+      description:
+        "Sign-in from programs on your own computer (localhost callbacks) is turned off. The Publisher owner can turn it on by setting ALLOW_LOOPBACK_CALLBACKS to true in the Publisher Worker's Cloudflare settings.",
+    };
+  return {
+    description:
+      "Only the verified ChatGPT callback, or localhost callbacks when enabled, with public-client PKCE are accepted.",
+  };
 }
 
 function options(env: Env): OAuthProviderOptions<Env> {
@@ -29,12 +52,7 @@ function options(env: Env): OAuthProviderOptions<Env> {
     },
     clientIdMetadataDocumentEnabled: false,
     clientRegistrationCallback: ({ clientMetadata }) =>
-      registrationAllowed(clientMetadata, callbacks(env))
-        ? undefined
-        : {
-            description:
-              "Only experimentally verified ChatGPT callbacks with public-client PKCE are enabled.",
-          },
+      registrationError(clientMetadata, env),
     onError: () => {},
     apiHandler: {
       async fetch(request, bindings, ctx) {

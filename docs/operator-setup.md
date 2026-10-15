@@ -188,13 +188,17 @@ To update an existing 0.1.2 Publisher after its owner has connected a publishing
 
 ### ChatGPT registration rejected before connection
 
-`invalid_client_metadata: Only experimentally verified ChatGPT callbacks with public-client PKCE are enabled.` comes from the installed Publisher's registration policy. It does not mean Cloudflare installation failed. An empty `CHATGPT_CALLBACKS` rejects all registrations.
+`invalid_client_metadata: Only experimentally verified ChatGPT callbacks with public-client PKCE are enabled.` (0.1.12 and earlier; from 0.1.13: `Only the verified ChatGPT callback, or localhost callbacks when enabled, …`) comes from the installed Publisher's registration policy. It does not mean Cloudflare installation failed. An empty `CHATGPT_CALLBACKS` rejects all registrations.
 
 Capture the exact OAuth redirect URI shown by ChatGPT's MCP management/creation interface. In the **installed Publisher Worker in the owner's Cloudflare account**, open Settings → Variables and Secrets and set `CHATGPT_CALLBACKS` to a JSON array containing that exact URI, then deploy the configuration and retry ChatGPT creation. This is a Publisher variable, not the Cloudflare installer OAuth client's `/callback` setting. Changing the operator's installer variable alone does not update an existing Publisher.
 
 [OpenAI's authentication documentation](https://developers.openai.com/plugins/build/auth) specifies `https://chatgpt.com/connector_platform_oauth_redirect` for servers supporting issuer identification, and `https://chatgpt.com/connector/oauth/{callback_id}` otherwise. Our discovery advertises issuer identification, so the stable URI is expected, but confirm the actual selection rather than inventing a callback ID or allowing a wildcard. If the creation screen provides no redirect URI, capture only `redirect_uris` and `token_endpoint_auth_method` from registration diagnostics; do not collect authorization headers, tokens, or full request logs. Registration currently also requires the explicit authentication method `none`. The SDK discovery advertises additional secret methods, so a rejection after configuring the callback needs the actual method checked.
 
 The tester confirmed the stable URI in the New Plugin dialog on 2026-10-05. For this installation, set the text variable `CHATGPT_CALLBACKS` to `["https://chatgpt.com/connector_platform_oauth_redirect"]`, save/deploy, then retry Create in ChatGPT. The source configurations now include this exact URI for future deployments. Registration and token exchange remain unverified until the retry succeeds.
+
+### Local AI clients (localhost callbacks): 0.1.13
+
+Clients that run on the owner's computer, such as Claude Code, register a `http://localhost:<port>/callback` redirect. From 0.1.13 the Publisher accepts loopback callbacks only when its text variable `ALLOW_LOOPBACK_CALLBACKS` is `true`; new installations leave it unset. When unset, registration fails with a message naming the variable. The updater inherits Worker settings, so the value survives updates. Risk accepted by enabling it: any program running as the owner on a device where the owner is signed in can open the approval page, and the self-reported client name cannot distinguish programs. The approval page shows a warning for loopback callbacks. Granted access can only be revoked by resetting the owner password, which signs out every client (see TODO.md).
 
 ### Owner sign-in and consent error recovery: 0.1.4
 

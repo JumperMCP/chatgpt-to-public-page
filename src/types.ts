@@ -119,6 +119,7 @@ export interface Env {
   ACCOUNT_SUBDOMAIN: string;
   INSTALLATION_ID: string;
   CHATGPT_CALLBACKS: string;
+  ALLOW_LOOPBACK_CALLBACKS?: string;
   FILE_DOWNLOAD_HOSTS: string;
   RELEASE_VERSION: string;
   CREDENTIAL_KEY: string;
