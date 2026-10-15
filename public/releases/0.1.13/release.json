@@ -1,0 +1,20 @@
+{
+  "manifest": {
+    "version": "0.1.13",
+    "commit": "3a1f0bb222d1e0fa7ad8b987baa5b0a0323588b4",
+    "schema": 1,
+    "migration_tag": "v1",
+    "durable_object_class": "Publisher",
+    "compatibility_date": "2026-09-01",
+    "modules": [
+      {
+        "name": "worker.js",
+        "sha256": "78a6d0e17127443d69d9c6763ef1fc774cde594bff9b277172cc87b681a68015",
+        "size": 2018455,
+        "type": "application/javascript+module"
+      }
+    ],
+    "notes": "# 0.1.13 — opt-in sign-in for local AI clients\n\nThe Publisher can now accept sign-in from MCP clients that run on your own computer, such as coding agents in a terminal. These clients receive the sign-in result on a `localhost` address with a changing port. This is off by default. To turn it on, set the text variable `ALLOW_LOOPBACK_CALLBACKS` to `true` in the Publisher Worker's Cloudflare settings (Settings → Variables and Secrets). Publisher updates keep this setting.\n\nWhen it is on, loopback callbacks (`http://localhost`, `127.0.0.1`, `[::1]`, any port) are accepted at registration, on the approval page and at approval. The rules are unchanged otherwise: public client, PKCE S256, and no credentials, query or fragment in the callback. When it is off, such a client is refused with a message naming the setting. For a local callback, the approval page warns that any program on that computer can open it, so approve only a sign-in you just started yourself. The approval page now says \"your AI client\" instead of ChatGPT. The configured ChatGPT callback is unchanged.\n\nNo migration, credential, or origin changes.\n"
+  },
+  "signature": "l35q98Ersu7rPKFoqEFPZRmJ1pAVeaVJO2bnkWuz2MoD0ESFv8A0iCugvEIa+VmBGZxDbhUFZ7+yLKBW6KE4Ag=="
+}
